@@ -12,13 +12,15 @@ void main() {
 
 enum AlifboTili { uz, ru, en }
 
+enum OquvBolimi { harflar, raqamlar }
+
 class QuvnoqAlifbeApp extends StatelessWidget {
   const QuvnoqAlifbeApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Quvnoq Alifbe (UZ / RU / EN)',
+      title: 'Quvnoq Alifbe — Husnixat va Raqamlar',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -91,7 +93,6 @@ class _KirishSahifasiState extends State<KirishSahifasi> {
       return;
     }
 
-    // 4 xonali tasodifiy SMS-kod yaratish (Real loyihada Eskiz.uz / Firebase API shu yerga ulanadi)
     final tasodifiyKod = (1000 + Random().nextInt(9000)).toString();
 
     setState(() {
@@ -105,7 +106,6 @@ class _KirishSahifasiState extends State<KirishSahifasi> {
 
     _taymerniBoshlash();
 
-    // Brauzerda darhol sinash uchun SMS-kodni bildirishnoma sifatida ko'rsatish
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -141,7 +141,7 @@ class _KirishSahifasiState extends State<KirishSahifasi> {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => RasmMosAlifbeSahifa(
+          builder: (_) => HusnixatAlifbeSahifa(
             boshlangichTil: _tanlanganTil,
             foydalanuvchiTelefoni: '+998 ${_telefonController.text}',
           ),
@@ -161,11 +161,11 @@ class _KirishSahifasiState extends State<KirishSahifasi> {
   String get _sarlavha {
     switch (_tanlanganTil) {
       case AlifboTili.uz:
-        return 'QUVNOQ ALIFBE';
+        return 'HUSNIXAT ALIFBE';
       case AlifboTili.ru:
-        return 'ВЕСЁЛАЯ АЗБУКА';
+        return 'ПРОПИСИ АЗБУКА';
       case AlifboTili.en:
-        return 'FUN ALPHABET';
+        return 'CURSIVE ALPHABET';
     }
   }
 
@@ -237,7 +237,6 @@ class _KirishSahifasiState extends State<KirishSahifasi> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Til tanlash tugmalari (UZ / RU / EN)
                     Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
@@ -254,8 +253,6 @@ class _KirishSahifasiState extends State<KirishSahifasi> {
                       ),
                     ),
                     const SizedBox(height: 18),
-
-                    // Oq asosiy kirish kartochkasi
                     Container(
                       padding: const EdgeInsets.all(26),
                       decoration: BoxDecoration(
@@ -271,12 +268,12 @@ class _KirishSahifasiState extends State<KirishSahifasi> {
                       ),
                       child: Column(
                         children: [
-                          const Text('🎨📚', style: TextStyle(fontSize: 48)),
+                          const Text('✍️🔢', style: TextStyle(fontSize: 48)),
                           const SizedBox(height: 6),
                           Text(
                             _sarlavha,
                             style: GoogleFonts.fredoka(
-                              fontSize: 30,
+                              fontSize: 28,
                               fontWeight: FontWeight.w800,
                               color: const Color(0xFF1E88E5),
                             ),
@@ -291,9 +288,7 @@ class _KirishSahifasiState extends State<KirishSahifasi> {
                             ),
                           ),
                           const SizedBox(height: 24),
-
                           if (!_smsYuborildi) ...[
-                            // Telefon raqam kiritish maydoni (+998)
                             TextField(
                               controller: _telefonController,
                               keyboardType: TextInputType.phone,
@@ -341,7 +336,6 @@ class _KirishSahifasiState extends State<KirishSahifasi> {
                               onSubmitted: (_) => _smsKodYuborish(),
                             ),
                           ] else ...[
-                            // Yuborilgan telefon raqami va o'zgartirish tugmasi
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -363,13 +357,10 @@ class _KirishSahifasiState extends State<KirishSahifasi> {
                                   },
                                   icon: const Icon(Icons.edit_rounded,
                                       color: Colors.orange),
-                                  tooltip: 'Raqamni o‘zgartirish',
                                 ),
                               ],
                             ),
                             const SizedBox(height: 12),
-
-                            // 4 xonali SMS-kod katakchalari
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: List.generate(4, (index) {
@@ -416,8 +407,6 @@ class _KirishSahifasiState extends State<KirishSahifasi> {
                               }),
                             ),
                             const SizedBox(height: 12),
-
-                            // Qayta SMS yuborish taymeri
                             if (_qolganSoniya > 0)
                               Text(
                                 _tanlanganTil == AlifboTili.ru
@@ -441,8 +430,6 @@ class _KirishSahifasiState extends State<KirishSahifasi> {
                                 ),
                               ),
                           ],
-
-                          // Xatolik xabari
                           if (_xatoMatni != null) ...[
                             const SizedBox(height: 12),
                             Text(
@@ -455,10 +442,7 @@ class _KirishSahifasiState extends State<KirishSahifasi> {
                               ),
                             ),
                           ],
-
                           const SizedBox(height: 22),
-
-                          // Asosiy tasdiqlash tugmasi
                           SizedBox(
                             width: double.infinity,
                             height: 56,
@@ -524,39 +508,74 @@ class _KirishSahifasiState extends State<KirishSahifasi> {
 }
 
 /// ============================================================================
-/// 2. ASOSIY ALIFBE VA HUSNIXAT O'YIN SAHIFASI (UZ / RU / EN)
+/// 2. HARFLAR (UZ / RU / EN) VA RAQAMLAR (0-9) MA'LUMOT MODELLARI
 /// ============================================================================
 class HarfDarsModel {
   final String katta;
   final String kichik;
-  final String soz;
-  final String talaffuzMatni;
+  final String sozUz;
+  final String sozRu;
+  final String sozEn;
+  final String talaffuzUz;
+  final String talaffuzRu;
+  final String talaffuzEn;
   final String emoji;
   final String audioFayl;
   final bool unli;
+  final bool raqammi;
 
   const HarfDarsModel({
     required this.katta,
     required this.kichik,
-    required this.soz,
-    required this.talaffuzMatni,
+    required this.sozUz,
+    String? sozRu,
+    String? sozEn,
+    required this.talaffuzUz,
+    String? talaffuzRu,
+    String? talaffuzEn,
     required this.emoji,
     required this.audioFayl,
     this.unli = false,
-  });
+    this.raqammi = false,
+  })  : sozRu = sozRu ?? sozUz,
+        sozEn = sozEn ?? sozUz,
+        talaffuzRu = talaffuzRu ?? talaffuzUz,
+        talaffuzEn = talaffuzEn ?? talaffuzUz;
+
+  String sozniOlish(AlifboTili til) {
+    switch (til) {
+      case AlifboTili.uz:
+        return sozUz;
+      case AlifboTili.ru:
+        return sozRu;
+      case AlifboTili.en:
+        return sozEn;
+    }
+  }
+
+  String talaffuzniOlish(AlifboTili til) {
+    switch (til) {
+      case AlifboTili.uz:
+        return talaffuzUz;
+      case AlifboTili.ru:
+        return talaffuzRu;
+      case AlifboTili.en:
+        return talaffuzEn;
+    }
+  }
 }
 
 class OvozIjrochi {
   static final AudioPlayer _player = AudioPlayer();
   static final FlutterTts _tts = FlutterTts();
 
-  static Future<void> harfniTalaffuzQil(
-      HarfDarsModel harf, AlifboTili til) async {
+  static Future<void> elementniTalaffuzQil(
+      HarfDarsModel item, AlifboTili til) async {
     try {
       await _player.stop();
       await _tts.stop();
       await _player
-          .play(AssetSource('audio/${til.name}_${harf.audioFayl}.mp3'));
+          .play(AssetSource('audio/${til.name}_${item.audioFayl}.mp3'));
     } catch (_) {
       await _tts.setVolume(1.0);
       await _tts.setSpeechRate(0.45);
@@ -576,7 +595,7 @@ class OvozIjrochi {
           await _tts.setLanguage('ru-RU');
         }
       }
-      await _tts.speak(harf.talaffuzMatni);
+      await _tts.speak(item.talaffuzniOlish(til));
     }
   }
 
@@ -594,222 +613,222 @@ class OvozIjrochi {
   }
 }
 
-/// 1. O'ZBEK ALIFBOSI
+/// 1. O'ZBEK ALIFBOSI (Barcha 30 ta harf va tutuq belgisi — husnixat)
 const List<HarfDarsModel> uzbekAlifbosi = [
   HarfDarsModel(
       katta: 'O',
       kichik: 'o',
-      soz: 'Olmaxon',
-      talaffuzMatni: 'O harfi! Olmaxon',
+      sozUz: 'Olmaxon',
+      talaffuzUz: 'O harfi! Olmaxon',
       emoji: '🐿️',
       audioFayl: 'o',
       unli: true),
   HarfDarsModel(
       katta: 'N',
       kichik: 'n',
-      soz: 'Non',
-      talaffuzMatni: 'N harfi! Non',
+      sozUz: 'Non',
+      talaffuzUz: 'N harfi! Non',
       emoji: '🍞',
       audioFayl: 'n'),
   HarfDarsModel(
       katta: 'A',
       kichik: 'a',
-      soz: 'Archa',
-      talaffuzMatni: 'A harfi! Archa',
+      sozUz: 'Archa',
+      talaffuzUz: 'A harfi! Archa',
       emoji: '🌲',
       audioFayl: 'a',
       unli: true),
   HarfDarsModel(
       katta: 'I',
       kichik: 'i',
-      soz: 'Nina',
-      talaffuzMatni: 'I harfi! Nina',
+      sozUz: 'Nina',
+      talaffuzUz: 'I harfi! Nina',
       emoji: '🪡',
       audioFayl: 'i',
       unli: true),
   HarfDarsModel(
       katta: 'M',
       kichik: 'm',
-      soz: 'Maymun',
-      talaffuzMatni: 'M harfi! Maymun',
+      sozUz: 'Maymun',
+      talaffuzUz: 'M harfi! Maymun',
       emoji: '🐒',
       audioFayl: 'm'),
   HarfDarsModel(
       katta: 'T',
       kichik: 't',
-      soz: 'Tulki',
-      talaffuzMatni: 'T harfi! Tulki',
+      sozUz: 'Tulki',
+      talaffuzUz: 'T harfi! Tulki',
       emoji: '🦊',
       audioFayl: 't'),
   HarfDarsModel(
       katta: 'L',
       kichik: 'l',
-      soz: 'Lola',
-      talaffuzMatni: 'L harfi! Lola',
+      sozUz: 'Lola',
+      talaffuzUz: 'L harfi! Lola',
       emoji: '🌷',
       audioFayl: 'l'),
   HarfDarsModel(
       katta: 'B',
       kichik: 'b',
-      soz: 'Baliq',
-      talaffuzMatni: 'B harfi! Baliq',
+      sozUz: 'Baliq',
+      talaffuzUz: 'B harfi! Baliq',
       emoji: '🐠',
       audioFayl: 'b'),
   HarfDarsModel(
       katta: 'K',
       kichik: 'k',
-      soz: 'Koptok',
-      talaffuzMatni: 'K harfi! Koptok',
+      sozUz: 'Koptok',
+      talaffuzUz: 'K harfi! Koptok',
       emoji: '⚽',
       audioFayl: 'k'),
   HarfDarsModel(
       katta: 'R',
       kichik: 'r',
-      soz: 'Ruchka',
-      talaffuzMatni: 'R harfi! Ruchka',
+      sozUz: 'Ruchka',
+      talaffuzUz: 'R harfi! Ruchka',
       emoji: '🖊️',
       audioFayl: 'r'),
   HarfDarsModel(
       katta: 'O‘',
       kichik: 'o‘',
-      soz: 'O‘rik',
-      talaffuzMatni: 'O‘ harfi! O‘rik',
+      sozUz: 'O‘rik',
+      talaffuzUz: 'O‘ harfi! O‘rik',
       emoji: '🍑',
       audioFayl: 'o_tut',
       unli: true),
   HarfDarsModel(
       katta: 'D',
       kichik: 'd',
-      soz: 'Doira',
-      talaffuzMatni: 'D harfi! Doira',
+      sozUz: 'Doira',
+      talaffuzUz: 'D harfi! Doira',
       emoji: '🥁',
       audioFayl: 'd'),
   HarfDarsModel(
       katta: 'U',
       kichik: 'u',
-      soz: 'Uy',
-      talaffuzMatni: 'U harfi! Uy',
+      sozUz: 'Uy',
+      talaffuzUz: 'U harfi! Uy',
       emoji: '🏠',
       audioFayl: 'u',
       unli: true),
   HarfDarsModel(
       katta: 'Y',
       kichik: 'y',
-      soz: 'Yo‘lbars',
-      talaffuzMatni: 'Y harfi! Yo‘lbars',
+      sozUz: 'Yo‘lbars',
+      talaffuzUz: 'Y harfi! Yo‘lbars',
       emoji: '🐅',
       audioFayl: 'y'),
   HarfDarsModel(
       katta: 'E',
       kichik: 'e',
-      soz: 'Echki',
-      talaffuzMatni: 'E harfi! Echki',
+      sozUz: 'Echki',
+      talaffuzUz: 'E harfi! Echki',
       emoji: '🐐',
       audioFayl: 'e',
       unli: true),
   HarfDarsModel(
       katta: 'G',
       kichik: 'g',
-      soz: 'Gul',
-      talaffuzMatni: 'G harfi! Gul',
+      sozUz: 'Gul',
+      talaffuzUz: 'G harfi! Gul',
       emoji: '🌹',
       audioFayl: 'g'),
   HarfDarsModel(
       katta: 'Ng',
       kichik: 'ng',
-      soz: 'Bodring',
-      talaffuzMatni: 'Ng harfi! Bodring',
+      sozUz: 'Bodring',
+      talaffuzUz: 'Ng harfi! Bodring',
       emoji: '🥒',
       audioFayl: 'ng'),
   HarfDarsModel(
       katta: 'S',
       kichik: 's',
-      soz: 'Soyabon',
-      talaffuzMatni: 'S harfi! Soyabon',
+      sozUz: 'Soyabon',
+      talaffuzUz: 'S harfi! Soyabon',
       emoji: '☂️',
       audioFayl: 's'),
   HarfDarsModel(
       katta: 'H',
       kichik: 'h',
-      soz: 'Handalak',
-      talaffuzMatni: 'H harfi! Handalak',
+      sozUz: 'Handalak',
+      talaffuzUz: 'H harfi! Handalak',
       emoji: '🍈',
       audioFayl: 'h'),
   HarfDarsModel(
       katta: 'Sh',
       kichik: 'sh',
-      soz: 'Sher',
-      talaffuzMatni: 'Sh harfi! Sher',
+      sozUz: 'Sher',
+      talaffuzUz: 'Sh harfi! Sher',
       emoji: '🦁',
       audioFayl: 'sh'),
   HarfDarsModel(
       katta: 'P',
       kichik: 'p',
-      soz: 'Kapalak',
-      talaffuzMatni: 'P harfi! Kapalak',
+      sozUz: 'Kapalak',
+      talaffuzUz: 'P harfi! Kapalak',
       emoji: '🦋',
       audioFayl: 'p'),
   HarfDarsModel(
       katta: 'Q',
       kichik: 'q',
-      soz: 'Quyosh',
-      talaffuzMatni: 'Q harfi! Quyosh',
+      sozUz: 'Quyosh',
+      talaffuzUz: 'Q harfi! Quyosh',
       emoji: '☀️',
       audioFayl: 'q'),
   HarfDarsModel(
       katta: 'Ch',
       kichik: 'ch',
-      soz: 'Choynak',
-      talaffuzMatni: 'Ch harfi! Choynak',
+      sozUz: 'Choynak',
+      talaffuzUz: 'Ch harfi! Choynak',
       emoji: '🫖',
       audioFayl: 'ch'),
   HarfDarsModel(
       katta: 'J',
       kichik: 'j',
-      soz: 'Jo‘ja',
-      talaffuzMatni: 'J harfi! Jo‘ja',
+      sozUz: 'Jo‘ja',
+      talaffuzUz: 'J harfi! Jo‘ja',
       emoji: '🐥',
       audioFayl: 'j'),
   HarfDarsModel(
       katta: 'G‘',
       kichik: 'g‘',
-      soz: 'Nog‘ora',
-      talaffuzMatni: 'G‘ harfi! Nog‘ora',
+      sozUz: 'Nog‘ora',
+      talaffuzUz: 'G‘ harfi! Nog‘ora',
       emoji: '🥁',
       audioFayl: 'g_tut'),
   HarfDarsModel(
       katta: 'Z',
       kichik: 'z',
-      soz: 'Uzum',
-      talaffuzMatni: 'Z harfi! Uzum',
+      sozUz: 'Uzum',
+      talaffuzUz: 'Z harfi! Uzum',
       emoji: '🍇',
       audioFayl: 'z'),
   HarfDarsModel(
       katta: 'V',
       kichik: 'v',
-      soz: 'Varrak',
-      talaffuzMatni: 'V harfi! Varrak',
+      sozUz: 'Varrak',
+      talaffuzUz: 'V harfi! Varrak',
       emoji: '🪁',
       audioFayl: 'v'),
   HarfDarsModel(
       katta: 'X',
       kichik: 'x',
-      soz: 'Xo‘roz',
-      talaffuzMatni: 'X harfi! Xo‘roz',
+      sozUz: 'Xo‘roz',
+      talaffuzUz: 'X harfi! Xo‘roz',
       emoji: '🐓',
       audioFayl: 'x'),
   HarfDarsModel(
       katta: 'F',
       kichik: 'f',
-      soz: 'Fil',
-      talaffuzMatni: 'F harfi! Fil',
+      sozUz: 'Fil',
+      talaffuzUz: 'F harfi! Fil',
       emoji: '🐘',
       audioFayl: 'f'),
   HarfDarsModel(
       katta: '’',
       kichik: '’',
-      soz: 'A’lo',
-      talaffuzMatni: 'Tutuq belgisi! A’lo',
+      sozUz: 'A’lo',
+      talaffuzUz: 'Tutuq belgisi! A’lo',
       emoji: '🌟',
       audioFayl: 'tutuq'),
 ];
@@ -819,241 +838,241 @@ const List<HarfDarsModel> rusAlifbosi = [
   HarfDarsModel(
       katta: 'А',
       kichik: 'а',
-      soz: 'Арбуз',
-      talaffuzMatni: 'Буква А! Арбуз',
+      sozUz: 'Арбуз',
+      talaffuzUz: 'Буква А! Арбуз',
       emoji: '🍉',
       audioFayl: 'a',
       unli: true),
   HarfDarsModel(
       katta: 'Б',
       kichik: 'б',
-      soz: 'Бабочка',
-      talaffuzMatni: 'Буква Б! Бабочка',
+      sozUz: 'Бабочка',
+      talaffuzUz: 'Буква Б! Бабочка',
       emoji: '🦋',
       audioFayl: 'b'),
   HarfDarsModel(
       katta: 'В',
       kichik: 'в',
-      soz: 'Волк',
-      talaffuzMatni: 'Буква В! Волк',
+      sozUz: 'Волк',
+      talaffuzUz: 'Буква В! Волк',
       emoji: '🐺',
       audioFayl: 'v'),
   HarfDarsModel(
       katta: 'Г',
       kichik: 'г',
-      soz: 'Гриб',
-      talaffuzMatni: 'Буква Г! Гриб',
+      sozUz: 'Гриб',
+      talaffuzUz: 'Буква Г! Гриб',
       emoji: '🍄',
       audioFayl: 'g'),
   HarfDarsModel(
       katta: 'Д',
       kichik: 'д',
-      soz: 'Дом',
-      talaffuzMatni: 'Буква Д! Дом',
+      sozUz: 'Дом',
+      talaffuzUz: 'Буква Д! Дом',
       emoji: '🏠',
       audioFayl: 'd'),
   HarfDarsModel(
       katta: 'Е',
       kichik: 'е',
-      soz: 'Енот',
-      talaffuzMatni: 'Буква Е! Енот',
+      sozUz: 'Енот',
+      talaffuzUz: 'Буква Е! Енот',
       emoji: '🦝',
       audioFayl: 'e',
       unli: true),
   HarfDarsModel(
       katta: 'Ё',
       kichik: 'ё',
-      soz: 'Ёжик',
-      talaffuzMatni: 'Буква Ё! Ёжик',
+      sozUz: 'Ёжик',
+      talaffuzUz: 'Буква Ё! Ёжик',
       emoji: '🦔',
       audioFayl: 'yo',
       unli: true),
   HarfDarsModel(
       katta: 'Ж',
       kichik: 'ж',
-      soz: 'Жираф',
-      talaffuzMatni: 'Буква Ж! Жираф',
+      sozUz: 'Жираф',
+      talaffuzUz: 'Буква Ж! Жираф',
       emoji: '🦒',
       audioFayl: 'zh'),
   HarfDarsModel(
       katta: 'З',
       kichik: 'з',
-      soz: 'Заяц',
-      talaffuzMatni: 'Буква З! Заяц',
+      sozUz: 'Заяц',
+      talaffuzUz: 'Буква З! Заяц',
       emoji: '🐰',
       audioFayl: 'z'),
   HarfDarsModel(
       katta: 'И',
       kichik: 'и',
-      soz: 'Игрушка',
-      talaffuzMatni: 'Буква И! Игрушка',
+      sozUz: 'Игрушка',
+      talaffuzUz: 'Буква И! Игрушка',
       emoji: '🧸',
       audioFayl: 'i',
       unli: true),
   HarfDarsModel(
       katta: 'Й',
       kichik: 'й',
-      soz: 'Йогурт',
-      talaffuzMatni: 'И краткое! Йогурт',
+      sozUz: 'Йогурт',
+      talaffuzUz: 'И краткое! Йогурт',
       emoji: '🥛',
       audioFayl: 'y_kr'),
   HarfDarsModel(
       katta: 'К',
       kichik: 'к',
-      soz: 'Кот',
-      talaffuzMatni: 'Буква К! Кот',
+      sozUz: 'Кот',
+      talaffuzUz: 'Буква К! Кот',
       emoji: '🐱',
       audioFayl: 'k'),
   HarfDarsModel(
       katta: 'Л',
       kichik: 'л',
-      soz: 'Лиса',
-      talaffuzMatni: 'Буква Л! Лиса',
+      sozUz: 'Лиса',
+      talaffuzUz: 'Буква Л! Лиса',
       emoji: '🦊',
       audioFayl: 'l'),
   HarfDarsModel(
       katta: 'М',
       kichik: 'м',
-      soz: 'Медведь',
-      talaffuzMatni: 'Буква М! Медведь',
+      sozUz: 'Медведь',
+      talaffuzUz: 'Буква М! Медведь',
       emoji: '🐻',
       audioFayl: 'm'),
   HarfDarsModel(
       katta: 'Н',
       kichik: 'н',
-      soz: 'Носорог',
-      talaffuzMatni: 'Буква Н! Носорог',
+      sozUz: 'Носорог',
+      talaffuzUz: 'Буква Н! Носорог',
       emoji: '🦏',
       audioFayl: 'n'),
   HarfDarsModel(
       katta: 'О',
       kichik: 'о',
-      soz: 'Облако',
-      talaffuzMatni: 'Буква О! Облако',
+      sozUz: 'Облако',
+      talaffuzUz: 'Буква О! Облако',
       emoji: '☁️',
       audioFayl: 'o',
       unli: true),
   HarfDarsModel(
       katta: 'П',
       kichik: 'п',
-      soz: 'Пчела',
-      talaffuzMatni: 'Буква П! Пчела',
+      sozUz: 'Пчела',
+      talaffuzUz: 'Буква П! Пчела',
       emoji: '🐝',
       audioFayl: 'p'),
   HarfDarsModel(
       katta: 'Р',
       kichik: 'р',
-      soz: 'Рыба',
-      talaffuzMatni: 'Буква Р! Рыба',
+      sozUz: 'Рыба',
+      talaffuzUz: 'Буква Р! Рыба',
       emoji: '🐠',
       audioFayl: 'r'),
   HarfDarsModel(
       katta: 'С',
       kichik: 'с',
-      soz: 'Солнце',
-      talaffuzMatni: 'Буква С! Солнце',
+      sozUz: 'Солнце',
+      talaffuzUz: 'Буква С! Солнце',
       emoji: '☀️',
       audioFayl: 's'),
   HarfDarsModel(
       katta: 'Т',
       kichik: 'т',
-      soz: 'Тигр',
-      talaffuzMatni: 'Буква Т! Тигр',
+      sozUz: 'Тигр',
+      talaffuzUz: 'Буква Т! Тигр',
       emoji: '🐅',
       audioFayl: 't'),
   HarfDarsModel(
       katta: 'У',
       kichik: 'у',
-      soz: 'Утка',
-      talaffuzMatni: 'Буква У! Утка',
+      sozUz: 'Утка',
+      talaffuzUz: 'Буква У! Утка',
       emoji: '🦆',
       audioFayl: 'u',
       unli: true),
   HarfDarsModel(
       katta: 'Ф',
       kichik: 'ф',
-      soz: 'Флаг',
-      talaffuzMatni: 'Буква Ф! Флаг',
+      sozUz: 'Флаг',
+      talaffuzUz: 'Буква Ф! Флаг',
       emoji: '🚩',
       audioFayl: 'f'),
   HarfDarsModel(
       katta: 'Х',
       kichik: 'х',
-      soz: 'Хлеб',
-      talaffuzMatni: 'Буква Х! Хлеб',
+      sozUz: 'Хлеб',
+      talaffuzUz: 'Буква Х! Хлеб',
       emoji: '🍞',
       audioFayl: 'x'),
   HarfDarsModel(
       katta: 'Ц',
       kichik: 'ц',
-      soz: 'Цветок',
-      talaffuzMatni: 'Буква Ц! Цветок',
+      sozUz: 'Цветок',
+      talaffuzUz: 'Буква Ц! Цветок',
       emoji: '🌸',
       audioFayl: 'ts'),
   HarfDarsModel(
       katta: 'Ч',
       kichik: 'ч',
-      soz: 'Черепаха',
-      talaffuzMatni: 'Буква Ч! Черепаха',
+      sozUz: 'Черепаха',
+      talaffuzUz: 'Буква Ч! Черепаха',
       emoji: '🐢',
       audioFayl: 'ch'),
   HarfDarsModel(
       katta: 'Ш',
       kichik: 'ш',
-      soz: 'Шар',
-      talaffuzMatni: 'Буква Ш! Шар',
+      sozUz: 'Шар',
+      talaffuzUz: 'Буква Ш! Шар',
       emoji: '🎈',
       audioFayl: 'sh'),
   HarfDarsModel(
       katta: 'Щ',
       kichik: 'щ',
-      soz: 'Щенок',
-      talaffuzMatni: 'Буква Щ! Щенок',
+      sozUz: 'Щенок',
+      talaffuzUz: 'Буква Щ! Щенок',
       emoji: '🐶',
       audioFayl: 'shch'),
   HarfDarsModel(
       katta: 'Ъ',
       kichik: 'ъ',
-      soz: 'Твёрдый знак',
-      talaffuzMatni: 'Твёрдый знак',
+      sozUz: 'Твёрдый знак',
+      talaffuzUz: 'Твёрдый знак',
       emoji: '✍️',
       audioFayl: 'tverd'),
   HarfDarsModel(
       katta: 'Ы',
       kichik: 'ы',
-      soz: 'Сыр',
-      talaffuzMatni: 'Буква Ы! Сыр',
+      sozUz: 'Сыр',
+      talaffuzUz: 'Буква Ы! Сыр',
       emoji: '🧀',
       audioFayl: 'yi',
       unli: true),
   HarfDarsModel(
       katta: 'Ь',
       kichik: 'ь',
-      soz: 'Мягкий знак',
-      talaffuzMatni: 'Мягкий знак',
+      sozUz: 'Мягкий знак',
+      talaffuzUz: 'Мягкий знак',
       emoji: '🪶',
       audioFayl: 'myagk'),
   HarfDarsModel(
       katta: 'Э',
       kichik: 'э',
-      soz: 'Экскаватор',
-      talaffuzMatni: 'Буква Э! Экскаватор',
+      sozUz: 'Экскаватор',
+      talaffuzUz: 'Буква Э! Экскаватор',
       emoji: '🚜',
       audioFayl: 'eh',
       unli: true),
   HarfDarsModel(
       katta: 'Ю',
       kichik: 'ю',
-      soz: 'Юла',
-      talaffuzMatni: 'Буква Ю! Юла',
+      sozUz: 'Юла',
+      talaffuzUz: 'Буква Ю! Юла',
       emoji: '🪀',
       audioFayl: 'yu',
       unli: true),
   HarfDarsModel(
       katta: 'Я',
       kichik: 'я',
-      soz: 'Яблоко',
-      talaffuzMatni: 'Буква Я! Яблоко',
+      sozUz: 'Яблоко',
+      talaffuzUz: 'Буква Я! Яблоко',
       emoji: '🍎',
       audioFayl: 'ya',
       unli: true),
@@ -1064,190 +1083,324 @@ const List<HarfDarsModel> englishAlifbosi = [
   HarfDarsModel(
       katta: 'A',
       kichik: 'a',
-      soz: 'Apple',
-      talaffuzMatni: 'Letter A! Apple',
+      sozUz: 'Apple',
+      talaffuzUz: 'Letter A! Apple',
       emoji: '🍎',
       audioFayl: 'a',
       unli: true),
   HarfDarsModel(
       katta: 'B',
       kichik: 'b',
-      soz: 'Ball',
-      talaffuzMatni: 'Letter B! Ball',
+      sozUz: 'Ball',
+      talaffuzUz: 'Letter B! Ball',
       emoji: '⚽',
       audioFayl: 'b'),
   HarfDarsModel(
       katta: 'C',
       kichik: 'c',
-      soz: 'Cat',
-      talaffuzMatni: 'Letter C! Cat',
+      sozUz: 'Cat',
+      talaffuzUz: 'Letter C! Cat',
       emoji: '🐱',
       audioFayl: 'c'),
   HarfDarsModel(
       katta: 'D',
       kichik: 'd',
-      soz: 'Dog',
-      talaffuzMatni: 'Letter D! Dog',
+      sozUz: 'Dog',
+      talaffuzUz: 'Letter D! Dog',
       emoji: '🐶',
       audioFayl: 'd'),
   HarfDarsModel(
       katta: 'E',
       kichik: 'e',
-      soz: 'Elephant',
-      talaffuzMatni: 'Letter E! Elephant',
+      sozUz: 'Elephant',
+      talaffuzUz: 'Letter E! Elephant',
       emoji: '🐘',
       audioFayl: 'e',
       unli: true),
   HarfDarsModel(
       katta: 'F',
       kichik: 'f',
-      soz: 'Fish',
-      talaffuzMatni: 'Letter F! Fish',
+      sozUz: 'Fish',
+      talaffuzUz: 'Letter F! Fish',
       emoji: '🐠',
       audioFayl: 'f'),
   HarfDarsModel(
       katta: 'G',
       kichik: 'g',
-      soz: 'Grapes',
-      talaffuzMatni: 'Letter G! Grapes',
+      sozUz: 'Grapes',
+      talaffuzUz: 'Letter G! Grapes',
       emoji: '🍇',
       audioFayl: 'g'),
   HarfDarsModel(
       katta: 'H',
       kichik: 'h',
-      soz: 'House',
-      talaffuzMatni: 'Letter H! House',
+      sozUz: 'House',
+      talaffuzUz: 'Letter H! House',
       emoji: '🏠',
       audioFayl: 'h'),
   HarfDarsModel(
       katta: 'I',
       kichik: 'i',
-      soz: 'Ice cream',
-      talaffuzMatni: 'Letter I! Ice cream',
+      sozUz: 'Ice cream',
+      talaffuzUz: 'Letter I! Ice cream',
       emoji: '🍦',
       audioFayl: 'i',
       unli: true),
   HarfDarsModel(
       katta: 'J',
       kichik: 'j',
-      soz: 'Juice',
-      talaffuzMatni: 'Letter J! Juice',
+      sozUz: 'Juice',
+      talaffuzUz: 'Letter J! Juice',
       emoji: '🧃',
       audioFayl: 'j'),
   HarfDarsModel(
       katta: 'K',
       kichik: 'k',
-      soz: 'Kite',
-      talaffuzMatni: 'Letter K! Kite',
+      sozUz: 'Kite',
+      talaffuzUz: 'Letter K! Kite',
       emoji: '🪁',
       audioFayl: 'k'),
   HarfDarsModel(
       katta: 'L',
       kichik: 'l',
-      soz: 'Lion',
-      talaffuzMatni: 'Letter L! Lion',
+      sozUz: 'Lion',
+      talaffuzUz: 'Letter L! Lion',
       emoji: '🦁',
       audioFayl: 'l'),
   HarfDarsModel(
       katta: 'M',
       kichik: 'm',
-      soz: 'Monkey',
-      talaffuzMatni: 'Letter M! Monkey',
+      sozUz: 'Monkey',
+      talaffuzUz: 'Letter M! Monkey',
       emoji: '🐒',
       audioFayl: 'm'),
   HarfDarsModel(
       katta: 'N',
       kichik: 'n',
-      soz: 'Nest',
-      talaffuzMatni: 'Letter N! Nest',
+      sozUz: 'Nest',
+      talaffuzUz: 'Letter N! Nest',
       emoji: '🪺',
       audioFayl: 'n'),
   HarfDarsModel(
       katta: 'O',
       kichik: 'o',
-      soz: 'Orange',
-      talaffuzMatni: 'Letter O! Orange',
+      sozUz: 'Orange',
+      talaffuzUz: 'Letter O! Orange',
       emoji: '🍊',
       audioFayl: 'o',
       unli: true),
   HarfDarsModel(
       katta: 'P',
       kichik: 'p',
-      soz: 'Panda',
-      talaffuzMatni: 'Letter P! Panda',
+      sozUz: 'Panda',
+      talaffuzUz: 'Letter P! Panda',
       emoji: '🐼',
       audioFayl: 'p'),
   HarfDarsModel(
       katta: 'Q',
       kichik: 'q',
-      soz: 'Queen',
-      talaffuzMatni: 'Letter Q! Queen',
+      sozUz: 'Queen',
+      talaffuzUz: 'Letter Q! Queen',
       emoji: '👑',
       audioFayl: 'q'),
   HarfDarsModel(
       katta: 'R',
       kichik: 'r',
-      soz: 'Rabbit',
-      talaffuzMatni: 'Letter R! Rabbit',
+      sozUz: 'Rabbit',
+      talaffuzUz: 'Letter R! Rabbit',
       emoji: '🐰',
       audioFayl: 'r'),
   HarfDarsModel(
       katta: 'S',
       kichik: 's',
-      soz: 'Sun',
-      talaffuzMatni: 'Letter S! Sun',
+      sozUz: 'Sun',
+      talaffuzUz: 'Letter S! Sun',
       emoji: '☀️',
       audioFayl: 's'),
   HarfDarsModel(
       katta: 'T',
       kichik: 't',
-      soz: 'Tiger',
-      talaffuzMatni: 'Letter T! Tiger',
+      sozUz: 'Tiger',
+      talaffuzUz: 'Letter T! Tiger',
       emoji: '🐅',
       audioFayl: 't'),
   HarfDarsModel(
       katta: 'U',
       kichik: 'u',
-      soz: 'Umbrella',
-      talaffuzMatni: 'Letter U! Umbrella',
+      sozUz: 'Umbrella',
+      talaffuzUz: 'Letter U! Umbrella',
       emoji: '☂️',
       audioFayl: 'u',
       unli: true),
   HarfDarsModel(
       katta: 'V',
       kichik: 'v',
-      soz: 'Violin',
-      talaffuzMatni: 'Letter V! Violin',
+      sozUz: 'Violin',
+      talaffuzUz: 'Letter V! Violin',
       emoji: '🎻',
       audioFayl: 'v'),
   HarfDarsModel(
       katta: 'W',
       kichik: 'w',
-      soz: 'Whale',
-      talaffuzMatni: 'Letter W! Whale',
+      sozUz: 'Whale',
+      talaffuzUz: 'Letter W! Whale',
       emoji: '🐋',
       audioFayl: 'w'),
   HarfDarsModel(
       katta: 'X',
       kichik: 'x',
-      soz: 'Xylophone',
-      talaffuzMatni: 'Letter X! Xylophone',
+      sozUz: 'Xylophone',
+      talaffuzUz: 'Letter X! Xylophone',
       emoji: '🎶',
       audioFayl: 'x'),
   HarfDarsModel(
       katta: 'Y',
       kichik: 'y',
-      soz: 'Yo-yo',
-      talaffuzMatni: 'Letter Y! Yo-yo',
+      sozUz: 'Yo-yo',
+      talaffuzUz: 'Letter Y! Yo-yo',
       emoji: '🪀',
       audioFayl: 'y'),
   HarfDarsModel(
       katta: 'Z',
       kichik: 'z',
-      soz: 'Zebra',
-      talaffuzMatni: 'Letter Z! Zebra',
+      sozUz: 'Zebra',
+      talaffuzUz: 'Letter Z! Zebra',
       emoji: '🦓',
       audioFayl: 'z'),
+];
+
+/// 4. RAQAMLAR BO'LIMI (0 dan 9 gacha — 3 tilda talaffuz va sanash emojilari bilan)
+const List<HarfDarsModel> raqamlarRoyxati = [
+  HarfDarsModel(
+    katta: '0',
+    kichik: '0',
+    sozUz: 'Nol',
+    sozRu: 'Ноль',
+    sozEn: 'Zero',
+    talaffuzUz: 'Nol raqami!',
+    talaffuzRu: 'Цифра ноль!',
+    talaffuzEn: 'Number zero!',
+    emoji: '⭕',
+    audioFayl: 'num_0',
+    raqammi: true,
+  ),
+  HarfDarsModel(
+    katta: '1',
+    kichik: '1',
+    sozUz: 'Bir',
+    sozRu: 'Один',
+    sozEn: 'One',
+    talaffuzUz: 'Bir! Bitta quyosh',
+    talaffuzRu: 'Один! Одно солнце',
+    talaffuzEn: 'One! One sun',
+    emoji: '☀️',
+    audioFayl: 'num_1',
+    raqammi: true,
+  ),
+  HarfDarsModel(
+    katta: '2',
+    kichik: '2',
+    sozUz: 'Ikki',
+    sozRu: 'Два',
+    sozEn: 'Two',
+    talaffuzUz: 'Ikki! Ikkita olma',
+    talaffuzRu: 'Два! Два яблока',
+    talaffuzEn: 'Two! Two apples',
+    emoji: '🍎🍎',
+    audioFayl: 'num_2',
+    raqammi: true,
+  ),
+  HarfDarsModel(
+    katta: '3',
+    kichik: '3',
+    sozUz: 'Uch',
+    sozRu: 'Три',
+    sozEn: 'Three',
+    talaffuzUz: 'Uch! Uchta yulduz',
+    talaffuzRu: 'Три! Три звезды',
+    talaffuzEn: 'Three! Three stars',
+    emoji: '⭐⭐⭐',
+    audioFayl: 'num_3',
+    raqammi: true,
+  ),
+  HarfDarsModel(
+    katta: '4',
+    kichik: '4',
+    sozUz: 'To‘rt',
+    sozRu: 'Четыре',
+    sozEn: 'Four',
+    talaffuzUz: 'To‘rt! To‘rtta kapalak',
+    talaffuzRu: 'Четыре! Четыре бабочки',
+    talaffuzEn: 'Four! Four butterflies',
+    emoji: '🦋🦋🦋🦋',
+    audioFayl: 'num_4',
+    raqammi: true,
+  ),
+  HarfDarsModel(
+    katta: '5',
+    kichik: '5',
+    sozUz: 'Besh',
+    sozRu: 'Пять',
+    sozEn: 'Five',
+    talaffuzUz: 'Besh! Beshta gul',
+    talaffuzRu: 'Пять! Пять цветов',
+    talaffuzEn: 'Five! Five flowers',
+    emoji: '🌷🌷🌷🌷🌷',
+    audioFayl: 'num_5',
+    raqammi: true,
+  ),
+  HarfDarsModel(
+    katta: '6',
+    kichik: '6',
+    sozUz: 'Olti',
+    sozRu: 'Шесть',
+    sozEn: 'Six',
+    talaffuzUz: 'Olti! Oltita baliq',
+    talaffuzRu: 'Шесть! Шесть рыбок',
+    talaffuzEn: 'Six! Six fish',
+    emoji: '🐠🐠🐠🐠🐠🐠',
+    audioFayl: 'num_6',
+    raqammi: true,
+  ),
+  HarfDarsModel(
+    katta: '7',
+    kichik: '7',
+    sozUz: 'Yetti',
+    sozRu: 'Семь',
+    sozEn: 'Seven',
+    talaffuzUz: 'Yetti! Yettita qulupnay',
+    talaffuzRu: 'Семь! Семь ягод',
+    talaffuzEn: 'Seven! Seven berries',
+    emoji: '🍓🍓🍓🍓🍓🍓🍓',
+    audioFayl: 'num_7',
+    raqammi: true,
+  ),
+  HarfDarsModel(
+    katta: '8',
+    kichik: '8',
+    sozUz: 'Sakkiz',
+    sozRu: 'Восемь',
+    sozEn: 'Eight',
+    talaffuzUz: 'Sakkiz! Sakkizta ari',
+    talaffuzRu: 'Восемь! Восемь пчёл',
+    talaffuzEn: 'Eight! Eight bees',
+    emoji: '🐝🐝🐝🐝🐝🐝🐝🐝',
+    audioFayl: 'num_8',
+    raqammi: true,
+  ),
+  HarfDarsModel(
+    katta: '9',
+    kichik: '9',
+    sozUz: 'To‘qqiz',
+    sozRu: 'Девять',
+    sozEn: 'Nine',
+    talaffuzUz: 'To‘qqiz! To‘qqizta yurakcha',
+    talaffuzRu: 'Девять! Девять сердечек',
+    talaffuzEn: 'Nine! Nine hearts',
+    emoji: '❤️❤️❤️❤️❤️❤️❤️❤️❤️',
+    audioFayl: 'num_9',
+    raqammi: true,
+  ),
 ];
 
 class HarfYolagi {
@@ -1262,18 +1415,25 @@ class HarfYolagi {
   });
 }
 
-class KengHarfGeometriyasi {
+/// ============================================================================
+/// 3. BARCHA HARFLAR (KATTA/KICHIK) VA RAQAMLAR (0-9) UCHUN HUSNIXAT GEOMETRIYASI
+/// ============================================================================
+class HusnixatGeometriyasi {
   static List<HarfYolagi> yolaklarniOlish(
-      String harf, bool kattaHarf, Size size) {
+      String belgi, bool kattaHarf, bool raqammi, Size size) {
     final double w = size.width;
     final double h = size.height;
     final double cx = w * 0.50;
-    final double cy = h * 0.50;
+    final double cy = (kattaHarf || raqammi) ? h * 0.50 : h * 0.54;
 
-    final double ry = h * (kattaHarf ? 0.34 : 0.26);
+    final double ry = h * ((kattaHarf || raqammi) ? 0.34 : 0.25);
     final double rx = min(w * 0.30, ry * 0.92);
 
-    Offset p(double nx, double ny) => Offset(cx + nx * rx, cy + ny * ry);
+    // Haqiqiy maktab husnixat (kursiv/propisi) qiyaligi — o'ngga 15 gradus og'ish
+    Offset p(double nx, double ny) {
+      final double ogish = -ny * 0.24;
+      return Offset(cx + (nx + ogish) * rx, cy + ny * ry);
+    }
 
     List<Offset> chiziq(Offset a, Offset b, int n) {
       return List.generate(n, (i) {
@@ -1291,157 +1451,577 @@ class KengHarfGeometriyasi {
       });
     }
 
-    final String hNorm = harf.toUpperCase();
+    // --- A) RAQAMLAR (0 dan 9 gacha husnixat ko'rinishida) ---
+    if (raqammi) {
+      switch (belgi) {
+        case '0':
+          return [
+            HarfYolagi(
+              raqam: 1,
+              yopiqKontur: true,
+              nuqtalar: yoy(0, 0, 0.72, 0.95, -pi / 2, 2 * pi, 18),
+            ),
+          ];
+        case '1':
+          return [
+            HarfYolagi(
+              raqam: 1,
+              nuqtalar: [
+                ...chiziq(p(-0.45, -0.35), p(0.15, -0.95), 5),
+                ...chiziq(p(0.15, -0.95), p(0.15, 0.95), 10),
+              ],
+            ),
+            HarfYolagi(
+              raqam: 2,
+              nuqtalar: chiziq(p(-0.35, 0.95), p(0.60, 0.95), 6),
+            ),
+          ];
+        case '2':
+          return [
+            HarfYolagi(
+              raqam: 1,
+              nuqtalar: [
+                ...yoy(-0.05, -0.45, 0.62, 0.50, -0.85 * pi, 1.15 * pi, 10),
+                ...chiziq(p(0.50, -0.25), p(-0.65, 0.95), 8),
+                ...chiziq(p(-0.65, 0.95), p(0.68, 0.95), 7),
+              ],
+            ),
+          ];
+        case '3':
+          return [
+            HarfYolagi(
+              raqam: 1,
+              nuqtalar: yoy(-0.10, -0.48, 0.62, 0.48, -0.75 * pi, 1.25 * pi, 9),
+            ),
+            HarfYolagi(
+              raqam: 2,
+              nuqtalar: yoy(-0.10, 0.48, 0.68, 0.48, -pi / 2, 1.25 * pi, 10),
+            ),
+          ];
+        case '4':
+          return [
+            HarfYolagi(
+              raqam: 1,
+              nuqtalar: [
+                ...chiziq(p(0.25, -0.95), p(-0.68, 0.25), 8),
+                ...chiziq(p(-0.68, 0.25), p(0.72, 0.25), 7),
+              ],
+            ),
+            HarfYolagi(
+              raqam: 2,
+              nuqtalar: chiziq(p(0.25, -0.95), p(0.25, 0.95), 10),
+            ),
+          ];
+        case '5':
+          return [
+            HarfYolagi(
+              raqam: 1,
+              nuqtalar: [
+                ...chiziq(p(-0.45, -0.95), p(-0.55, -0.10), 6),
+                ...yoy(-0.05, 0.42, 0.68, 0.53, -0.75 * pi, 1.45 * pi, 11),
+              ],
+            ),
+            HarfYolagi(
+              raqam: 2,
+              nuqtalar: chiziq(p(-0.45, -0.95), p(0.62, -0.95), 6),
+            ),
+          ];
+        case '6':
+          return [
+            HarfYolagi(
+              raqam: 1,
+              nuqtalar: [
+                ...yoy(0.10, -0.10, 0.72, 0.85, -0.25 * pi, -0.85 * pi, 9),
+                ...yoy(0.0, 0.42, 0.64, 0.52, pi, -2 * pi, 12),
+              ],
+            ),
+          ];
+        case '7':
+          return [
+            HarfYolagi(
+              raqam: 1,
+              nuqtalar: [
+                ...chiziq(p(-0.65, -0.95), p(0.65, -0.95), 7),
+                ...chiziq(p(0.65, -0.95), p(-0.20, 0.95), 10),
+              ],
+            ),
+            HarfYolagi(
+              raqam: 2,
+              nuqtalar: chiziq(p(-0.25, 0.0), p(0.55, 0.0), 5),
+            ),
+          ];
+        case '8':
+          return [
+            HarfYolagi(
+              raqam: 1,
+              yopiqKontur: true,
+              nuqtalar: yoy(0, -0.48, 0.55, 0.46, -pi / 2, 2 * pi, 12),
+            ),
+            HarfYolagi(
+              raqam: 2,
+              yopiqKontur: true,
+              nuqtalar: yoy(0, 0.48, 0.64, 0.48, -pi / 2, 2 * pi, 14),
+            ),
+          ];
+        case '9':
+          return [
+            HarfYolagi(
+              raqam: 1,
+              nuqtalar: [
+                ...yoy(0.0, -0.45, 0.62, 0.48, 0, -2 * pi, 12),
+                ...yoy(-0.08, 0.15, 0.70, 0.80, -0.15 * pi, 0.95 * pi, 10),
+              ],
+            ),
+          ];
+      }
+    }
+
+    // --- B) KICHIK YOZMA HUSNIXAT HARFLARI (a, o, n, m, i, l, b, k, d, u...) ---
+    if (!kattaHarf) {
+      switch (belgi) {
+        case 'a':
+        case 'а':
+          return [
+            HarfYolagi(
+              raqam: 1,
+              yopiqKontur: true,
+              nuqtalar: yoy(-0.15, 0.05, 0.62, 0.85, -pi / 4, -2 * pi, 14),
+            ),
+            HarfYolagi(
+              raqam: 2,
+              nuqtalar: [
+                ...chiziq(p(0.47, -0.75), p(0.47, 0.65), 7),
+                ...yoy(0.72, 0.65, 0.25, 0.25, pi, -pi, 4),
+              ],
+            ),
+          ];
+        case 'o':
+        case 'о':
+          return [
+            HarfYolagi(
+              raqam: 1,
+              yopiqKontur: true,
+              nuqtalar: yoy(0, 0.05, 0.68, 0.85, -pi / 2, 2 * pi, 16),
+            ),
+          ];
+        case 'o‘':
+          return [
+            HarfYolagi(
+              raqam: 1,
+              yopiqKontur: true,
+              nuqtalar: yoy(-0.12, 0.08, 0.65, 0.82, -pi / 2, 2 * pi, 15),
+            ),
+            HarfYolagi(
+              raqam: 2,
+              nuqtalar: yoy(0.75, -0.80, 0.24, 0.24, -pi / 2, pi, 5),
+            ),
+          ];
+        case 'i':
+          return [
+            HarfYolagi(
+              raqam: 1,
+              nuqtalar: [
+                ...chiziq(p(-0.10, -0.75), p(-0.10, 0.65), 7),
+                ...yoy(0.18, 0.65, 0.28, 0.25, pi, -pi, 4),
+              ],
+            ),
+            HarfYolagi(
+              raqam: 2,
+              nuqtalar: [p(-0.10, -1.18), p(-0.08, -1.18)],
+            ),
+          ];
+        case 'и':
+        case 'й':
+          return [
+            HarfYolagi(
+              raqam: 1,
+              nuqtalar: [
+                ...chiziq(p(-0.55, -0.75), p(-0.55, 0.65), 6),
+                ...yoy(-0.05, 0.65, 0.50, 0.25, pi, -pi, 6),
+              ],
+            ),
+            HarfYolagi(
+              raqam: 2,
+              nuqtalar: [
+                ...chiziq(p(0.45, -0.75), p(0.45, 0.65), 6),
+                ...yoy(0.70, 0.65, 0.25, 0.22, pi, -pi, 4),
+              ],
+            ),
+          ];
+        case 'n':
+        case 'п':
+          return [
+            HarfYolagi(
+                raqam: 1, nuqtalar: chiziq(p(-0.55, -0.75), p(-0.55, 0.88), 7)),
+            HarfYolagi(
+              raqam: 2,
+              nuqtalar: [
+                ...yoy(0.0, -0.35, 0.55, 0.42, pi, pi, 7),
+                ...chiziq(p(0.55, -0.35), p(0.55, 0.68), 5),
+                ...yoy(0.78, 0.68, 0.23, 0.20, pi, -pi, 4),
+              ],
+            ),
+          ];
+        case 'm':
+        case 'т':
+          return [
+            HarfYolagi(
+                raqam: 1, nuqtalar: chiziq(p(-0.85, -0.75), p(-0.85, 0.88), 7)),
+            HarfYolagi(
+              raqam: 2,
+              nuqtalar: [
+                ...yoy(-0.42, -0.38, 0.42, 0.38, pi, pi, 6),
+                ...chiziq(p(0, -0.38), p(0, 0.88), 6),
+              ],
+            ),
+            HarfYolagi(
+              raqam: 3,
+              nuqtalar: [
+                ...yoy(0.42, -0.38, 0.42, 0.38, pi, pi, 6),
+                ...chiziq(p(0.85, -0.38), p(0.85, 0.68), 5),
+                ...yoy(1.05, 0.68, 0.20, 0.18, pi, -pi, 3),
+              ],
+            ),
+          ];
+        case 'l':
+          return [
+            HarfYolagi(
+              raqam: 1,
+              nuqtalar: [
+                ...chiziq(p(-0.15, -1.15), p(-0.15, 0.65), 9),
+                ...yoy(0.15, 0.65, 0.30, 0.25, pi, -pi, 4),
+              ],
+            ),
+          ];
+        case 'b':
+          return [
+            HarfYolagi(
+                raqam: 1,
+                nuqtalar: chiziq(p(-0.55, -1.18), p(-0.55, 0.88), 10)),
+            HarfYolagi(
+              raqam: 2,
+              yopiqKontur: true,
+              nuqtalar: yoy(0.05, 0.15, 0.60, 0.72, -pi / 2, 2 * pi, 14),
+            ),
+          ];
+        case 'd':
+          return [
+            HarfYolagi(
+              raqam: 1,
+              yopiqKontur: true,
+              nuqtalar: yoy(-0.15, 0.15, 0.60, 0.72, -pi / 4, -2 * pi, 14),
+            ),
+            HarfYolagi(
+              raqam: 2,
+              nuqtalar: [
+                ...chiziq(p(0.45, -1.18), p(0.45, 0.65), 9),
+                ...yoy(0.70, 0.65, 0.25, 0.22, pi, -pi, 4),
+              ],
+            ),
+          ];
+        case 'u':
+          return [
+            HarfYolagi(
+              raqam: 1,
+              nuqtalar: [
+                ...chiziq(p(-0.55, -0.75), p(-0.55, 0.35), 5),
+                ...yoy(0.0, 0.35, 0.55, 0.52, pi, -pi, 8),
+              ],
+            ),
+            HarfYolagi(
+              raqam: 2,
+              nuqtalar: [
+                ...chiziq(p(0.55, -0.75), p(0.55, 0.65), 6),
+                ...yoy(0.78, 0.65, 0.23, 0.22, pi, -pi, 4),
+              ],
+            ),
+          ];
+        case 'e':
+        case 'е':
+        case 'ё':
+          return [
+            HarfYolagi(
+              raqam: 1,
+              nuqtalar: [
+                ...chiziq(p(-0.55, 0.05), p(0.62, 0.05), 5),
+                ...yoy(0.0, 0.05, 0.65, 0.82, 0, -1.70 * pi, 13),
+              ],
+            ),
+          ];
+      }
+    }
+
+    // --- C) KATTA YOZMA HUSNIXAT HARFLARI (Kalligrafik ilmoqchalar bilan) ---
+    final String hNorm = belgi.toUpperCase();
 
     switch (hNorm) {
-      case 'B':
-      case 'В':
-        return [
-          HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.65, -0.95), p(-0.65, 0.95), 11)),
-          HarfYolagi(
-            raqam: 2,
-            nuqtalar: [
-              ...chiziq(p(-0.42, -0.95), p(0.10, -0.95), 4),
-              ...yoy(0.10, -0.50, 0.55, 0.45, -pi / 2, pi, 8),
-              ...chiziq(p(0.10, -0.05), p(-0.42, -0.05), 4),
-            ],
-          ),
-          HarfYolagi(
-            raqam: 3,
-            nuqtalar: [
-              ...chiziq(p(-0.42, 0.05), p(0.18, 0.05), 4),
-              ...yoy(0.18, 0.50, 0.65, 0.45, -pi / 2, pi, 9),
-              ...chiziq(p(0.18, 0.95), p(-0.42, 0.95), 4),
-            ],
-          ),
-        ];
-      case 'Б':
-        return [
-          HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.60, -0.95), p(0.65, -0.95), 7)),
-          HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(-0.60, -0.95), p(-0.60, 0.95), 10)),
-          HarfYolagi(
-            raqam: 3,
-            nuqtalar: [
-              ...chiziq(p(-0.55, -0.05), p(0.15, -0.05), 4),
-              ...yoy(0.15, 0.45, 0.65, 0.50, -pi / 2, pi, 9),
-              ...chiziq(p(0.15, 0.95), p(-0.55, 0.95), 4),
-            ],
-          ),
-        ];
       case 'O':
       case 'О':
         return [
           HarfYolagi(
             raqam: 1,
             yopiqKontur: true,
-            nuqtalar: yoy(0, 0, 0.85, 0.95, -pi / 2, 2 * pi, 20),
+            nuqtalar: yoy(0, 0, 0.78, 0.95, -pi / 2, 2 * pi, 20),
           ),
         ];
+
       case 'O‘':
         return [
           HarfYolagi(
             raqam: 1,
             yopiqKontur: true,
-            nuqtalar: yoy(-0.12, 0.04, 0.78, 0.90, -pi / 2, 2 * pi, 18),
+            nuqtalar: yoy(-0.12, 0.04, 0.74, 0.90, -pi / 2, 2 * pi, 18),
           ),
           HarfYolagi(
             raqam: 2,
             nuqtalar: yoy(0.82, -0.78, 0.25, 0.25, -pi / 2, pi, 5),
           ),
         ];
+
+      // Yozma husnixat 'A' (pastda ilmoqchali va o'rtada to'lqinli)
       case 'A':
       case 'А':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(0, -0.95), p(-0.82, 0.95), 10)),
+            raqam: 1,
+            nuqtalar: [
+              ...yoy(-0.68, 0.75, 0.22, 0.20, pi * 0.8, -pi * 0.8, 4),
+              ...chiziq(p(-0.52, 0.85), p(0.05, -0.95), 9),
+            ],
+          ),
           HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(0, -0.95), p(0.82, 0.95), 10)),
+            raqam: 2,
+            nuqtalar: [
+              ...chiziq(p(0.05, -0.95), p(0.62, 0.75), 9),
+              ...yoy(0.84, 0.75, 0.22, 0.20, pi, -pi, 4),
+            ],
+          ),
           HarfYolagi(
-              raqam: 3, nuqtalar: chiziq(p(-0.48, 0.25), p(0.48, 0.25), 6)),
+            raqam: 3,
+            nuqtalar: chiziq(p(-0.35, 0.22), p(0.45, 0.22), 5),
+          ),
         ];
+
       case 'N':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.70, 0.95), p(-0.70, -0.95), 10)),
+            raqam: 1,
+            nuqtalar: [
+              ...yoy(-0.78, 0.75, 0.20, 0.20, pi, -pi, 4),
+              ...chiziq(p(-0.58, 0.75), p(-0.58, -0.95), 9),
+            ],
+          ),
           HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(-0.70, -0.95), p(0.70, 0.95), 10)),
+            raqam: 2,
+            nuqtalar: chiziq(p(-0.58, -0.95), p(0.58, 0.95), 10),
+          ),
           HarfYolagi(
-              raqam: 3, nuqtalar: chiziq(p(0.70, 0.95), p(0.70, -0.95), 10)),
+            raqam: 3,
+            nuqtalar: [
+              ...chiziq(p(0.58, 0.95), p(0.58, -0.75), 9),
+              ...yoy(0.78, -0.75, 0.20, 0.20, pi, pi, 4),
+            ],
+          ),
         ];
+
       case 'Н':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.70, -0.95), p(-0.70, 0.95), 10)),
+            raqam: 1,
+            nuqtalar: [
+              ...yoy(-0.75, 0.75, 0.20, 0.20, pi, -pi, 4),
+              ...chiziq(p(-0.55, 0.75), p(-0.55, -0.95), 9),
+            ],
+          ),
           HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(0.70, -0.95), p(0.70, 0.95), 10)),
-          HarfYolagi(raqam: 3, nuqtalar: chiziq(p(-0.70, 0), p(0.70, 0), 7)),
+            raqam: 2,
+            nuqtalar: [
+              ...chiziq(p(0.58, -0.95), p(0.58, 0.75), 9),
+              ...yoy(0.80, 0.75, 0.22, 0.20, pi, -pi, 4),
+            ],
+          ),
+          HarfYolagi(raqam: 3, nuqtalar: chiziq(p(-0.55, 0), p(0.58, 0), 6)),
         ];
+
       case 'I':
         return [
-          HarfYolagi(raqam: 1, nuqtalar: chiziq(p(0, -0.95), p(0, 0.95), 11)),
           HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(-0.42, -0.95), p(0.42, -0.95), 5)),
-          HarfYolagi(
-              raqam: 3, nuqtalar: chiziq(p(-0.42, 0.95), p(0.42, 0.95), 5)),
+            raqam: 1,
+            nuqtalar: [
+              ...yoy(0.25, -0.75, 0.25, 0.20, 0, -pi, 4),
+              ...chiziq(p(0.0, -0.75), p(0.0, 0.75), 8),
+              ...yoy(-0.28, 0.75, 0.28, 0.20, 0, pi, 4),
+            ],
+          ),
         ];
+
       case 'И':
       case 'Й':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.70, -0.95), p(-0.70, 0.95), 10)),
+            raqam: 1,
+            nuqtalar: [
+              ...yoy(-0.78, -0.75, 0.20, 0.20, pi, pi, 4),
+              ...chiziq(p(-0.58, -0.75), p(-0.58, 0.75), 8),
+              ...yoy(-0.02, 0.75, 0.56, 0.22, pi, -pi, 7),
+            ],
+          ),
           HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(-0.70, 0.95), p(0.70, -0.95), 10)),
-          HarfYolagi(
-              raqam: 3, nuqtalar: chiziq(p(0.70, -0.95), p(0.70, 0.95), 10)),
+            raqam: 2,
+            nuqtalar: [
+              ...chiziq(p(0.54, -0.95), p(0.54, 0.75), 9),
+              ...yoy(0.78, 0.75, 0.24, 0.20, pi, -pi, 4),
+            ],
+          ),
         ];
+
       case 'M':
       case 'М':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.85, 0.95), p(-0.85, -0.95), 10)),
+            raqam: 1,
+            nuqtalar: [
+              ...yoy(-0.92, 0.75, 0.18, 0.20, pi, -pi, 4),
+              ...chiziq(p(-0.74, 0.75), p(-0.74, -0.95), 9),
+            ],
+          ),
           HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(-0.85, -0.95), p(0, 0.25), 7)),
-          HarfYolagi(raqam: 3, nuqtalar: chiziq(p(0, 0.25), p(0.85, -0.95), 7)),
+              raqam: 2, nuqtalar: chiziq(p(-0.74, -0.95), p(0, 0.35), 7)),
+          HarfYolagi(raqam: 3, nuqtalar: chiziq(p(0, 0.35), p(0.74, -0.95), 7)),
           HarfYolagi(
-              raqam: 4, nuqtalar: chiziq(p(0.85, -0.95), p(0.85, 0.95), 10)),
+            raqam: 4,
+            nuqtalar: [
+              ...chiziq(p(0.74, -0.95), p(0.74, 0.75), 9),
+              ...yoy(0.94, 0.75, 0.20, 0.20, pi, -pi, 4),
+            ],
+          ),
         ];
+
       case 'T':
       case 'Т':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.85, -0.95), p(0.85, -0.95), 9)),
-          HarfYolagi(raqam: 2, nuqtalar: chiziq(p(0, -0.95), p(0, 0.95), 10)),
+            raqam: 1,
+            nuqtalar: [
+              ...yoy(-0.75, -0.75, 0.18, 0.20, pi, pi, 4),
+              ...chiziq(p(-0.57, -0.95), p(0.75, -0.95), 7),
+            ],
+          ),
+          HarfYolagi(
+            raqam: 2,
+            nuqtalar: [
+              ...chiziq(p(0.05, -0.95), p(0.05, 0.75), 9),
+              ...yoy(-0.22, 0.75, 0.27, 0.20, 0, pi, 4),
+            ],
+          ),
         ];
+
       case 'L':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.55, -0.95), p(-0.55, 0.95), 10)),
-          HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(-0.55, 0.95), p(0.70, 0.95), 7)),
+            raqam: 1,
+            nuqtalar: [
+              ...yoy(-0.25, -0.75, 0.25, 0.20, 0, -pi, 4),
+              ...chiziq(p(-0.50, -0.75), p(-0.50, 0.75), 8),
+              ...yoy(-0.20, 0.75, 0.30, 0.20, pi, -pi, 4),
+              ...chiziq(p(0.10, 0.92), p(0.75, 0.85), 5),
+            ],
+          ),
         ];
+
       case 'Л':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(0, -0.95), p(-0.75, 0.95), 10)),
+            raqam: 1,
+            nuqtalar: [
+              ...yoy(-0.78, 0.75, 0.20, 0.20, pi, -pi, 4),
+              ...chiziq(p(-0.58, 0.75), p(0.05, -0.95), 9),
+            ],
+          ),
           HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(0, -0.95), p(0.75, 0.95), 10)),
+            raqam: 2,
+            nuqtalar: [
+              ...chiziq(p(0.05, -0.95), p(0.62, 0.75), 9),
+              ...yoy(0.84, 0.75, 0.22, 0.20, pi, -pi, 4),
+            ],
+          ),
         ];
+
+      case 'B':
+      case 'В':
+        return [
+          HarfYolagi(
+            raqam: 1,
+            nuqtalar: [
+              ...chiziq(p(-0.55, -0.95), p(-0.55, 0.75), 9),
+              ...yoy(-0.78, 0.75, 0.23, 0.20, 0, pi, 4),
+            ],
+          ),
+          HarfYolagi(
+            raqam: 2,
+            nuqtalar: [
+              ...chiziq(p(-0.42, -0.95), p(0.10, -0.95), 4),
+              ...yoy(0.10, -0.50, 0.55, 0.45, -pi / 2, pi, 8),
+              ...chiziq(p(0.10, -0.05), p(-0.35, -0.05), 4),
+            ],
+          ),
+          HarfYolagi(
+            raqam: 3,
+            nuqtalar: [
+              ...chiziq(p(-0.35, 0.05), p(0.18, 0.05), 4),
+              ...yoy(0.18, 0.50, 0.65, 0.45, -pi / 2, pi, 9),
+              ...chiziq(p(0.18, 0.95), p(-0.42, 0.95), 4),
+            ],
+          ),
+        ];
+
+      case 'Б':
+        return [
+          HarfYolagi(
+              raqam: 1, nuqtalar: chiziq(p(-0.55, -0.95), p(0.65, -0.95), 7)),
+          HarfYolagi(
+              raqam: 2, nuqtalar: chiziq(p(-0.55, -0.95), p(-0.55, 0.95), 10)),
+          HarfYolagi(
+            raqam: 3,
+            nuqtalar: [
+              ...chiziq(p(-0.50, -0.05), p(0.15, -0.05), 4),
+              ...yoy(0.15, 0.45, 0.65, 0.50, -pi / 2, pi, 9),
+              ...chiziq(p(0.15, 0.95), p(-0.50, 0.95), 4),
+            ],
+          ),
+        ];
+
       case 'K':
       case 'К':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.60, -0.95), p(-0.60, 0.95), 10)),
+            raqam: 1,
+            nuqtalar: [
+              ...yoy(-0.75, -0.75, 0.20, 0.20, pi, pi, 4),
+              ...chiziq(p(-0.55, -0.75), p(-0.55, 0.75), 8),
+              ...yoy(-0.78, 0.75, 0.23, 0.20, 0, pi, 4),
+            ],
+          ),
           HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(0.70, -0.95), p(-0.55, 0), 8)),
-          HarfYolagi(raqam: 3, nuqtalar: chiziq(p(-0.55, 0), p(0.70, 0.95), 8)),
+              raqam: 2, nuqtalar: chiziq(p(0.65, -0.95), p(-0.48, 0), 8)),
+          HarfYolagi(
+            raqam: 3,
+            nuqtalar: [
+              ...chiziq(p(-0.48, 0), p(0.55, 0.75), 7),
+              ...yoy(0.78, 0.75, 0.23, 0.20, pi, -pi, 4),
+            ],
+          ),
         ];
+
       case 'R':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.60, -0.95), p(-0.60, 0.95), 10)),
+            raqam: 1,
+            nuqtalar: [
+              ...chiziq(p(-0.55, -0.95), p(-0.55, 0.75), 9),
+              ...yoy(-0.78, 0.75, 0.23, 0.20, 0, pi, 4),
+            ],
+          ),
           HarfYolagi(
             raqam: 2,
             nuqtalar: [
@@ -1451,13 +2031,24 @@ class KengHarfGeometriyasi {
             ],
           ),
           HarfYolagi(
-              raqam: 3, nuqtalar: chiziq(p(-0.10, 0.05), p(0.70, 0.95), 7)),
+            raqam: 3,
+            nuqtalar: [
+              ...chiziq(p(-0.10, 0.05), p(0.58, 0.75), 6),
+              ...yoy(0.80, 0.75, 0.22, 0.20, pi, -pi, 4),
+            ],
+          ),
         ];
+
       case 'P':
       case 'Р':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.60, -0.95), p(-0.60, 0.95), 10)),
+            raqam: 1,
+            nuqtalar: [
+              ...chiziq(p(-0.55, -0.95), p(-0.55, 0.75), 9),
+              ...yoy(-0.78, 0.75, 0.23, 0.20, 0, pi, 4),
+            ],
+          ),
           HarfYolagi(
             raqam: 2,
             nuqtalar: [
@@ -1467,223 +2058,321 @@ class KengHarfGeometriyasi {
             ],
           ),
         ];
+
       case 'П':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.70, 0.95), p(-0.70, -0.95), 10)),
+            raqam: 1,
+            nuqtalar: [
+              ...yoy(-0.78, 0.75, 0.20, 0.20, pi, -pi, 4),
+              ...chiziq(p(-0.58, 0.75), p(-0.58, -0.95), 9),
+            ],
+          ),
           HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(-0.70, -0.95), p(0.70, -0.95), 8)),
+              raqam: 2, nuqtalar: chiziq(p(-0.58, -0.95), p(0.58, -0.95), 7)),
           HarfYolagi(
-              raqam: 3, nuqtalar: chiziq(p(0.70, -0.95), p(0.70, 0.95), 10)),
+            raqam: 3,
+            nuqtalar: [
+              ...chiziq(p(0.58, -0.95), p(0.58, 0.75), 9),
+              ...yoy(0.80, 0.75, 0.22, 0.20, pi, -pi, 4),
+            ],
+          ),
         ];
+
       case 'D':
       case 'Д':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.65, -0.95), p(-0.65, 0.95), 10)),
+              raqam: 1, nuqtalar: chiziq(p(-0.55, -0.95), p(-0.55, 0.95), 10)),
           HarfYolagi(
             raqam: 2,
             nuqtalar: [
               ...chiziq(p(-0.45, -0.95), p(-0.10, -0.95), 3),
-              ...yoy(-0.10, 0, 0.90, 0.95, -pi / 2, pi, 12),
-              ...chiziq(p(-0.10, 0.95), p(-0.45, 0.95), 3),
+              ...yoy(-0.10, 0, 0.88, 0.95, -pi / 2, pi, 12),
+              ...chiziq(p(-0.10, 0.95), p(-0.65, 0.95), 4),
             ],
           ),
         ];
+
       case 'U':
         return [
           HarfYolagi(
             raqam: 1,
             nuqtalar: [
-              ...chiziq(p(-0.70, -0.95), p(-0.70, 0.25), 6),
-              ...yoy(0, 0.25, 0.70, 0.70, pi, -pi, 9),
-              ...chiziq(p(0.70, 0.25), p(0.70, -0.95), 6),
+              ...yoy(-0.78, -0.75, 0.20, 0.20, pi, pi, 4),
+              ...chiziq(p(-0.58, -0.75), p(-0.58, 0.25), 5),
+              ...yoy(0, 0.25, 0.58, 0.68, pi, -pi, 8),
+            ],
+          ),
+          HarfYolagi(
+            raqam: 2,
+            nuqtalar: [
+              ...chiziq(p(0.58, -0.95), p(0.58, 0.75), 9),
+              ...yoy(0.80, 0.75, 0.22, 0.20, pi, -pi, 4),
             ],
           ),
         ];
+
       case 'У':
       case 'Y':
         return [
-          HarfYolagi(raqam: 1, nuqtalar: chiziq(p(-0.75, -0.95), p(0, 0), 7)),
           HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(0.75, -0.95), p(-0.35, 0.95), 11)),
+            raqam: 1,
+            nuqtalar: [
+              ...yoy(-0.78, -0.75, 0.20, 0.20, pi, pi, 4),
+              ...chiziq(p(-0.58, -0.75), p(-0.58, -0.10), 4),
+              ...yoy(0, -0.10, 0.58, 0.45, pi, -pi, 7),
+            ],
+          ),
+          HarfYolagi(
+            raqam: 2,
+            nuqtalar: [
+              ...chiziq(p(0.58, -0.95), p(0.58, 0.65), 8),
+              ...yoy(0.15, 0.65, 0.43, 0.32, 0, pi, 6),
+            ],
+          ),
         ];
+
       case 'E':
       case 'Е':
       case 'Ё':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.65, -0.95), p(-0.65, 0.95), 10)),
+              raqam: 1,
+              nuqtalar: yoy(0.10, -0.48, 0.65, 0.46, -pi / 4, -1.25 * pi, 8)),
           HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(-0.65, -0.95), p(0.70, -0.95), 7)),
-          HarfYolagi(raqam: 3, nuqtalar: chiziq(p(-0.65, 0), p(0.55, 0), 6)),
-          HarfYolagi(
-              raqam: 4, nuqtalar: chiziq(p(-0.65, 0.95), p(0.70, 0.95), 7)),
+              raqam: 2,
+              nuqtalar: yoy(0.10, 0.48, 0.70, 0.48, -pi / 2, -1.25 * pi, 9)),
         ];
+
       case 'Э':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: yoy(-0.10, 0, 0.85, 0.95, -pi / 2, pi, 14)),
-          HarfYolagi(raqam: 2, nuqtalar: chiziq(p(-0.10, 0), p(0.70, 0), 5)),
+              raqam: 1, nuqtalar: yoy(-0.10, 0, 0.82, 0.95, -pi / 2, pi, 14)),
+          HarfYolagi(raqam: 2, nuqtalar: chiziq(p(-0.10, 0), p(0.68, 0), 5)),
         ];
+
       case 'G':
       case 'G‘':
         return [
           HarfYolagi(
               raqam: 1,
-              nuqtalar: yoy(0.05, 0, 0.85, 0.95, -pi / 5, -1.55 * pi, 15)),
+              nuqtalar: yoy(0.05, 0, 0.82, 0.95, -pi / 5, -1.55 * pi, 15)),
           HarfYolagi(
             raqam: 2,
             nuqtalar: [
-              ...chiziq(p(0.10, 0.15), p(0.85, 0.15), 5),
-              ...chiziq(p(0.85, 0.15), p(0.85, 0.90), 5),
+              ...chiziq(p(0.10, 0.15), p(0.82, 0.15), 5),
+              ...chiziq(p(0.82, 0.15), p(0.82, 0.90), 5),
             ],
           ),
         ];
+
       case 'Г':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.60, 0.95), p(-0.60, -0.95), 10)),
+            raqam: 1,
+            nuqtalar: [
+              ...chiziq(p(-0.45, -0.95), p(-0.45, 0.75), 9),
+              ...yoy(-0.70, 0.75, 0.25, 0.20, 0, pi, 4),
+            ],
+          ),
           HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(-0.60, -0.95), p(0.75, -0.95), 7)),
+            raqam: 2,
+            nuqtalar: [
+              ...chiziq(p(-0.45, -0.95), p(0.60, -0.95), 6),
+              ...yoy(0.60, -0.75, 0.20, 0.20, -pi / 2, pi, 4),
+            ],
+          ),
         ];
+
       case 'S':
       case 'С':
       case 'C':
         return [
           HarfYolagi(
               raqam: 1,
-              nuqtalar: yoy(0.15, 0, 0.85, 0.95, -pi / 4, -1.5 * pi, 16)),
+              nuqtalar: yoy(0.15, 0, 0.82, 0.95, -pi / 4, -1.5 * pi, 16)),
         ];
+
       case 'H':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.70, -0.95), p(-0.70, 0.95), 10)),
+            raqam: 1,
+            nuqtalar: [
+              ...chiziq(p(-0.58, -0.95), p(-0.58, 0.75), 9),
+              ...yoy(-0.80, 0.75, 0.22, 0.20, 0, pi, 4),
+            ],
+          ),
           HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(0.70, -0.95), p(0.70, 0.95), 10)),
-          HarfYolagi(raqam: 3, nuqtalar: chiziq(p(-0.70, 0), p(0.70, 0), 7)),
+            raqam: 2,
+            nuqtalar: [
+              ...chiziq(p(0.58, -0.95), p(0.58, 0.75), 9),
+              ...yoy(0.80, 0.75, 0.22, 0.20, pi, -pi, 4),
+            ],
+          ),
+          HarfYolagi(raqam: 3, nuqtalar: chiziq(p(-0.58, 0), p(0.58, 0), 6)),
         ];
+
       case 'X':
       case 'Х':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.75, -0.95), p(0.75, 0.95), 11)),
+              raqam: 1, nuqtalar: yoy(-0.35, 0, 0.55, 0.95, -pi / 2, pi, 11)),
           HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(0.75, -0.95), p(-0.75, 0.95), 11)),
+              raqam: 2, nuqtalar: yoy(0.35, 0, 0.55, 0.95, -pi / 2, -pi, 11)),
         ];
+
       case 'Q':
         return [
           HarfYolagi(
             raqam: 1,
             yopiqKontur: true,
-            nuqtalar: yoy(0, -0.05, 0.85, 0.90, -pi / 2, 2 * pi, 18),
+            nuqtalar: yoy(0, -0.05, 0.80, 0.90, -pi / 2, 2 * pi, 18),
           ),
           HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(0.25, 0.45), p(0.90, 1.0), 5)),
+            raqam: 2,
+            nuqtalar: [
+              ...chiziq(p(0.20, 0.45), p(0.65, 0.85), 4),
+              ...yoy(0.85, 0.85, 0.20, 0.15, pi, -pi, 3),
+            ],
+          ),
         ];
+
       case 'J':
         return [
           HarfYolagi(
             raqam: 1,
             nuqtalar: [
-              ...chiziq(p(0.35, -0.95), p(0.35, 0.40), 8),
-              ...yoy(-0.15, 0.40, 0.50, 0.55, 0, pi, 7),
+              ...chiziq(p(0.30, -0.95), p(0.30, 0.45), 8),
+              ...yoy(-0.18, 0.45, 0.48, 0.50, 0, pi, 7),
             ],
           ),
         ];
+
       case 'Z':
       case 'З':
         return [
           HarfYolagi(
               raqam: 1,
-              nuqtalar: yoy(-0.15, -0.48, 0.70, 0.48, -pi / 2, pi, 8)),
+              nuqtalar: yoy(-0.15, -0.48, 0.68, 0.48, -pi / 2, pi, 8)),
           HarfYolagi(
-              raqam: 2, nuqtalar: yoy(-0.15, 0.48, 0.75, 0.48, -pi / 2, pi, 8)),
+              raqam: 2, nuqtalar: yoy(-0.15, 0.48, 0.72, 0.48, -pi / 2, pi, 8)),
         ];
+
       case 'V':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.80, -0.95), p(0, 0.95), 10)),
-          HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(0, 0.95), p(0.80, -0.95), 10)),
+            raqam: 1,
+            nuqtalar: [
+              ...yoy(-0.85, -0.75, 0.18, 0.20, pi, pi, 4),
+              ...chiziq(p(-0.67, -0.75), p(0, 0.95), 9),
+              ...chiziq(p(0, 0.95), p(0.67, -0.75), 9),
+              ...yoy(0.85, -0.75, 0.18, 0.20, pi, -pi, 4),
+            ],
+          ),
         ];
+
       case 'W':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.95, -0.95), p(-0.48, 0.95), 8)),
+              raqam: 1, nuqtalar: chiziq(p(-0.90, -0.95), p(-0.45, 0.95), 8)),
           HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(-0.48, 0.95), p(0, -0.20), 6)),
-          HarfYolagi(raqam: 3, nuqtalar: chiziq(p(0, -0.20), p(0.48, 0.95), 6)),
+              raqam: 2, nuqtalar: chiziq(p(-0.45, 0.95), p(0, -0.20), 6)),
+          HarfYolagi(raqam: 3, nuqtalar: chiziq(p(0, -0.20), p(0.45, 0.95), 6)),
           HarfYolagi(
-              raqam: 4, nuqtalar: chiziq(p(0.48, 0.95), p(0.95, -0.95), 8)),
+              raqam: 4, nuqtalar: chiziq(p(0.45, 0.95), p(0.90, -0.95), 8)),
         ];
+
       case 'F':
       case 'Ф':
         return [
-          HarfYolagi(raqam: 1, nuqtalar: chiziq(p(0, -0.95), p(0, 0.95), 11)),
+          HarfYolagi(
+            raqam: 1,
+            nuqtalar: [
+              ...chiziq(p(0, -0.95), p(0, 0.75), 9),
+              ...yoy(-0.22, 0.75, 0.22, 0.20, 0, pi, 4),
+            ],
+          ),
           HarfYolagi(
             raqam: 2,
             yopiqKontur: true,
-            nuqtalar: yoy(0, -0.15, 0.80, 0.52, -pi / 2, 2 * pi, 14),
+            nuqtalar: yoy(0, -0.15, 0.78, 0.52, -pi / 2, 2 * pi, 14),
           ),
         ];
+
       case 'Ш':
       case 'Щ':
       case 'SH':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.80, -0.95), p(-0.80, 0.95), 8)),
+              raqam: 1, nuqtalar: chiziq(p(-0.75, -0.95), p(-0.75, 0.95), 8)),
           HarfYolagi(raqam: 2, nuqtalar: chiziq(p(0, -0.95), p(0, 0.95), 8)),
           HarfYolagi(
-              raqam: 3, nuqtalar: chiziq(p(0.80, -0.95), p(0.80, 0.95), 8)),
+              raqam: 3, nuqtalar: chiziq(p(0.75, -0.95), p(0.75, 0.95), 8)),
           HarfYolagi(
-              raqam: 4, nuqtalar: chiziq(p(-0.80, 0.95), p(0.80, 0.95), 8)),
+              raqam: 4, nuqtalar: chiziq(p(-0.75, 0.95), p(0.75, 0.95), 8)),
         ];
+
       case 'Ч':
       case 'CH':
         return [
           HarfYolagi(
             raqam: 1,
             nuqtalar: [
-              ...chiziq(p(-0.65, -0.95), p(-0.65, 0), 6),
-              ...chiziq(p(-0.65, 0), p(0.65, 0), 6),
+              ...yoy(-0.78, -0.75, 0.18, 0.20, pi, pi, 4),
+              ...chiziq(p(-0.60, -0.75), p(-0.60, -0.10), 4),
+              ...yoy(0, -0.10, 0.60, 0.35, pi, -pi, 7),
             ],
           ),
           HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(0.65, -0.95), p(0.65, 0.95), 10)),
+            raqam: 2,
+            nuqtalar: [
+              ...chiziq(p(0.60, -0.95), p(0.60, 0.75), 9),
+              ...yoy(0.82, 0.75, 0.22, 0.20, pi, -pi, 4),
+            ],
+          ),
         ];
+
       case 'Ж':
         return [
           HarfYolagi(raqam: 1, nuqtalar: chiziq(p(0, -0.95), p(0, 0.95), 10)),
           HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(-0.85, -0.95), p(0.85, 0.95), 10)),
+              raqam: 2, nuqtalar: chiziq(p(-0.80, -0.95), p(0.80, 0.95), 10)),
           HarfYolagi(
-              raqam: 3, nuqtalar: chiziq(p(0.85, -0.95), p(-0.85, 0.95), 10)),
+              raqam: 3, nuqtalar: chiziq(p(0.80, -0.95), p(-0.80, 0.95), 10)),
         ];
+
       case 'Ц':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.65, -0.95), p(-0.65, 0.95), 9)),
+              raqam: 1, nuqtalar: chiziq(p(-0.62, -0.95), p(-0.62, 0.95), 9)),
           HarfYolagi(
-              raqam: 2, nuqtalar: chiziq(p(0.55, -0.95), p(0.55, 0.95), 9)),
+              raqam: 2, nuqtalar: chiziq(p(0.52, -0.95), p(0.52, 0.95), 9)),
           HarfYolagi(
-              raqam: 3, nuqtalar: chiziq(p(-0.65, 0.95), p(0.85, 0.95), 8)),
+              raqam: 3, nuqtalar: chiziq(p(-0.62, 0.95), p(0.82, 0.95), 8)),
         ];
+
       case 'Ю':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.80, -0.95), p(-0.80, 0.95), 9)),
-          HarfYolagi(raqam: 2, nuqtalar: chiziq(p(-0.80, 0), p(-0.25, 0), 4)),
+              raqam: 1, nuqtalar: chiziq(p(-0.78, -0.95), p(-0.78, 0.95), 9)),
+          HarfYolagi(raqam: 2, nuqtalar: chiziq(p(-0.78, 0), p(-0.22, 0), 4)),
           HarfYolagi(
             raqam: 3,
             yopiqKontur: true,
-            nuqtalar: yoy(0.35, 0, 0.60, 0.90, -pi / 2, 2 * pi, 14),
+            nuqtalar: yoy(0.35, 0, 0.58, 0.90, -pi / 2, 2 * pi, 14),
           ),
         ];
+
       case 'Я':
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(0.60, -0.95), p(0.60, 0.95), 10)),
+            raqam: 1,
+            nuqtalar: [
+              ...chiziq(p(0.58, -0.95), p(0.58, 0.75), 9),
+              ...yoy(0.80, 0.75, 0.22, 0.20, pi, -pi, 4),
+            ],
+          ),
           HarfYolagi(
             raqam: 2,
             nuqtalar: [
@@ -1693,17 +2382,23 @@ class KengHarfGeometriyasi {
             ],
           ),
           HarfYolagi(
-              raqam: 3, nuqtalar: chiziq(p(0.15, 0.05), p(-0.70, 0.95), 7)),
+            raqam: 3,
+            nuqtalar: [
+              ...chiziq(p(0.15, 0.05), p(-0.55, 0.75), 6),
+              ...yoy(-0.75, 0.75, 0.20, 0.20, 0, pi, 4),
+            ],
+          ),
         ];
+
       default:
         return [
           HarfYolagi(
-              raqam: 1, nuqtalar: chiziq(p(-0.50, -0.95), p(-0.50, 0.95), 10)),
+              raqam: 1, nuqtalar: chiziq(p(-0.45, -0.95), p(-0.45, 0.95), 10)),
           HarfYolagi(
             raqam: 2,
             nuqtalar: [
               ...chiziq(p(-0.35, -0.05), p(0.15, -0.05), 4),
-              ...yoy(0.15, 0.45, 0.60, 0.50, -pi / 2, pi, 8),
+              ...yoy(0.15, 0.45, 0.58, 0.50, -pi / 2, pi, 8),
               ...chiziq(p(0.15, 0.95), p(-0.35, 0.95), 4),
             ],
           ),
@@ -1712,22 +2407,26 @@ class KengHarfGeometriyasi {
   }
 }
 
-class RasmMosAlifbeSahifa extends StatefulWidget {
+/// ============================================================================
+/// 4. ASOSIY HUSNIXAT ALIFBE VA RAQAMLAR SAHIFASI
+/// ============================================================================
+class HusnixatAlifbeSahifa extends StatefulWidget {
   final AlifboTili boshlangichTil;
   final String foydalanuvchiTelefoni;
 
-  const RasmMosAlifbeSahifa({
+  const HusnixatAlifbeSahifa({
     super.key,
     this.boshlangichTil = AlifboTili.uz,
     this.foydalanuvchiTelefoni = '',
   });
 
   @override
-  State<RasmMosAlifbeSahifa> createState() => _RasmMosAlifbeSahifaState();
+  State<HusnixatAlifbeSahifa> createState() => _HusnixatAlifbeSahifaState();
 }
 
-class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
+class _HusnixatAlifbeSahifaState extends State<HusnixatAlifbeSahifa> {
   late AlifboTili _tanlanganTil;
+  OquvBolimi _tanlanganBolim = OquvBolimi.harflar;
   int _tanlanganIndex = 0;
   bool _kattaHarf = true;
 
@@ -1737,9 +2436,12 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
   Offset? _oxirgiUchqunJoyi;
 
   int _yulduzlar = 0;
-  bool _harfYakunlandi = false;
+  bool _elementYakunlandi = false;
 
-  List<HarfDarsModel> get _joriyAlifbo {
+  List<HarfDarsModel> get _joriyRoyxat {
+    if (_tanlanganBolim == OquvBolimi.raqamlar) {
+      return raqamlarRoyxati;
+    }
     switch (_tanlanganTil) {
       case AlifboTili.uz:
         return uzbekAlifbosi;
@@ -1750,15 +2452,28 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
     }
   }
 
-  HarfDarsModel get _joriyHarf => _joriyAlifbo[_tanlanganIndex];
+  HarfDarsModel get _joriyElement => _joriyRoyxat[_tanlanganIndex];
 
   @override
   void initState() {
     super.initState();
     _tanlanganTil = widget.boshlangichTil;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      OvozIjrochi.harfniTalaffuzQil(_joriyHarf, _tanlanganTil);
+      OvozIjrochi.elementniTalaffuzQil(_joriyElement, _tanlanganTil);
     });
+  }
+
+  void _bolimniAlmashtirish(OquvBolimi yangiBolim) {
+    setState(() {
+      _tanlanganBolim = yangiBolim;
+      _tanlanganIndex = 0;
+      _ulanganNuqtalar.clear();
+      _chiziqlar.clear();
+      _joriyChiziq = [];
+      _oxirgiUchqunJoyi = null;
+      _elementYakunlandi = false;
+    });
+    OvozIjrochi.elementniTalaffuzQil(_joriyElement, _tanlanganTil);
   }
 
   void _tilniAlmashtirish(AlifboTili yangiTil) {
@@ -1769,9 +2484,9 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
       _chiziqlar.clear();
       _joriyChiziq = [];
       _oxirgiUchqunJoyi = null;
-      _harfYakunlandi = false;
+      _elementYakunlandi = false;
     });
-    OvozIjrochi.harfniTalaffuzQil(_joriyHarf, _tanlanganTil);
+    OvozIjrochi.elementniTalaffuzQil(_joriyElement, _tanlanganTil);
   }
 
   void _nuqtaniTekshir(Offset barmoqJoyi, List<HarfYolagi> yolaklar) {
@@ -1794,36 +2509,36 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
       }
     }
 
-    if (yangiUlandi && !_harfYakunlandi && jamiNuqtalar > 0) {
+    if (yangiUlandi && !_elementYakunlandi && jamiNuqtalar > 0) {
       if (_ulanganNuqtalar.length >= (jamiNuqtalar * 0.85).ceil()) {
-        _harfYakunlandi = true;
+        _elementYakunlandi = true;
         _yulduzlar += 1;
         OvozIjrochi.tabrikOvoz(_tanlanganTil);
       }
     }
   }
 
-  void _harfniTanlash(int index) {
+  void _elementniTanlash(int index) {
     setState(() {
       _tanlanganIndex = index;
       _ulanganNuqtalar.clear();
       _chiziqlar.clear();
       _joriyChiziq = [];
       _oxirgiUchqunJoyi = null;
-      _harfYakunlandi = false;
+      _elementYakunlandi = false;
     });
-    OvozIjrochi.harfniTalaffuzQil(_joriyHarf, _tanlanganTil);
+    OvozIjrochi.elementniTalaffuzQil(_joriyElement, _tanlanganTil);
   }
 
-  void _oldingiHarfgaOtish() {
+  void _oldingiElementgaOtish() {
     final int oldingi =
-        (_tanlanganIndex - 1 + _joriyAlifbo.length) % _joriyAlifbo.length;
-    _harfniTanlash(oldingi);
+        (_tanlanganIndex - 1 + _joriyRoyxat.length) % _joriyRoyxat.length;
+    _elementniTanlash(oldingi);
   }
 
-  void _keyingiHarfgaOtish() {
-    final int keyingi = (_tanlanganIndex + 1) % _joriyAlifbo.length;
-    _harfniTanlash(keyingi);
+  void _keyingiElementgaOtish() {
+    final int keyingi = (_tanlanganIndex + 1) % _joriyRoyxat.length;
+    _elementniTanlash(keyingi);
   }
 
   void _tozalash() {
@@ -1832,7 +2547,7 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
       _chiziqlar.clear();
       _joriyChiziq = [];
       _oxirgiUchqunJoyi = null;
-      _harfYakunlandi = false;
+      _elementYakunlandi = false;
     });
   }
 
@@ -1843,13 +2558,23 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
   }
 
   String get _sarlavhaMatni {
+    if (_tanlanganBolim == OquvBolimi.raqamlar) {
+      switch (_tanlanganTil) {
+        case AlifboTili.uz:
+          return '${_joriyElement.katta} RAQAMI';
+        case AlifboTili.ru:
+          return 'ЦИФРА ${_joriyElement.katta}';
+        case AlifboTili.en:
+          return 'NUMBER ${_joriyElement.katta}';
+      }
+    }
     switch (_tanlanganTil) {
       case AlifboTili.uz:
-        return '${_joriyHarf.katta} HARFI';
+        return '${_joriyElement.katta} HARFI';
       case AlifboTili.ru:
-        return 'БУКВА ${_joriyHarf.katta}';
+        return 'БУКВА ${_joriyElement.katta}';
       case AlifboTili.en:
-        return 'LETTER ${_joriyHarf.katta}';
+        return 'LETTER ${_joriyElement.katta}';
     }
   }
 
@@ -1877,8 +2602,10 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
 
   @override
   Widget build(BuildContext context) {
-    final String korsatiladiganHarf =
-        _kattaHarf ? _joriyHarf.katta : _joriyHarf.kichik;
+    final bool raqamRejimi = _tanlanganBolim == OquvBolimi.raqamlar;
+    final String korsatiladiganBelgi = (_kattaHarf || raqamRejimi)
+        ? _joriyElement.katta
+        : _joriyElement.kichik;
 
     return Scaffold(
       body: Container(
@@ -1921,8 +2648,12 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
                         final Size doskaSize =
                             Size(constraints.maxWidth, constraints.maxHeight);
                         final List<HarfYolagi> yolaklar =
-                            KengHarfGeometriyasi.yolaklarniOlish(
-                                korsatiladiganHarf, _kattaHarf, doskaSize);
+                            HusnixatGeometriyasi.yolaklarniOlish(
+                          korsatiladiganBelgi,
+                          _kattaHarf,
+                          raqamRejimi,
+                          doskaSize,
+                        );
 
                         return Stack(
                           children: [
@@ -1931,7 +2662,7 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
                                 painter: KonturNuqtaliHarfPainter(
                                   yolaklar: yolaklar,
                                   ulanganlar: _ulanganNuqtalar,
-                                  yakunlandi: _harfYakunlandi,
+                                  yakunlandi: _elementYakunlandi,
                                 ),
                               ),
                             ),
@@ -1959,13 +2690,13 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
                                   painter: MoviySiyohPainter(
                                     chiziqlar: _chiziqlar,
                                     uchqunJoyi: _oxirgiUchqunJoyi,
-                                    yakunlandi: _harfYakunlandi,
+                                    yakunlandi: _elementYakunlandi,
                                   ),
                                 ),
                               ),
                             ),
 
-                            // Chap yuqori: Katta/Kichik (A/a), Til (UZ/RU/EN) va Chiqish tugmasi
+                            // Chap yuqori: Bo'lim (Harflar / 0-9), Katta/Kichik, Til (UZ/RU/EN) va Chiqish
                             Positioned(
                               top: 14,
                               left: 16,
@@ -1974,50 +2705,53 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
                                 runSpacing: 6,
                                 crossAxisAlignment: WrapCrossAlignment.center,
                                 children: [
-                                  _kattaKichikTugma(),
+                                  _bolimTanlashTugmasi(),
+                                  if (!raqamRejimi) _kattaKichikTugma(),
                                   _tilTanlashTugmasi(),
-                                  // Foydalanuvchi telefoni va Chiqish tugmasi
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade100,
-                                      borderRadius: BorderRadius.circular(14),
-                                      border: Border.all(
-                                          color: Colors.grey.shade300),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(Icons.phone_android_rounded,
-                                            size: 16, color: Colors.blueGrey),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          widget.foydalanuvchiTelefoni,
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black87,
+                                  if (widget.foydalanuvchiTelefoni.isNotEmpty)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade100,
+                                        borderRadius: BorderRadius.circular(14),
+                                        border: Border.all(
+                                            color: Colors.grey.shade300),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                              Icons.phone_android_rounded,
+                                              size: 16,
+                                              color: Colors.blueGrey),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            widget.foydalanuvchiTelefoni,
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black87,
+                                            ),
                                           ),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        GestureDetector(
-                                          onTap: _tizimdanChiqish,
-                                          child: const Icon(
-                                            Icons.logout_rounded,
-                                            size: 18,
-                                            color: Colors.red,
+                                          const SizedBox(width: 6),
+                                          GestureDetector(
+                                            onTap: _tizimdanChiqish,
+                                            child: const Icon(
+                                              Icons.logout_rounded,
+                                              size: 18,
+                                              color: Colors.red,
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ),
                                 ],
                               ),
                             ),
 
                             // Tabrik nishoni
-                            if (_harfYakunlandi)
+                            if (_elementYakunlandi)
                               Positioned(
                                 top: 96,
                                 right: 16,
@@ -2079,7 +2813,7 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
                               bottom: 16,
                               right: 18,
                               child: ElevatedButton(
-                                onPressed: _keyingiHarfgaOtish,
+                                onPressed: _keyingiElementgaOtish,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF2196F3),
                                   foregroundColor: Colors.white,
@@ -2120,7 +2854,7 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
                 top: 10,
                 left: 18,
                 child: GestureDetector(
-                  onTap: _oldingiHarfgaOtish,
+                  onTap: _oldingiElementgaOtish,
                   child: Container(
                     width: 48,
                     height: 48,
@@ -2145,15 +2879,15 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
                 ),
               ),
 
-              // 3. Yuqori markaz: "B HARFI" sarlavhasi
+              // 3. Yuqori markaz: "B HARFI" / "5 RAQAMI" sarlavhasi
               Positioned(
                 top: 8,
                 left: 80,
                 right: 170,
                 child: Center(
                   child: GestureDetector(
-                    onTap: () => OvozIjrochi.harfniTalaffuzQil(
-                        _joriyHarf, _tanlanganTil),
+                    onTap: () => OvozIjrochi.elementniTalaffuzQil(
+                        _joriyElement, _tanlanganTil),
                     child: Stack(
                       children: [
                         Text(
@@ -2175,13 +2909,13 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
                             ),
                             children: [
                               TextSpan(
-                                text: _joriyHarf.katta,
+                                text: _joriyElement.katta,
                                 style:
                                     const TextStyle(color: Color(0xFFE53935)),
                               ),
                               TextSpan(
                                 text: _sarlavhaMatni
-                                    .substring(_joriyHarf.katta.length),
+                                    .substring(_joriyElement.katta.length),
                                 style:
                                     const TextStyle(color: Color(0xFF1E88E5)),
                               ),
@@ -2194,15 +2928,15 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
                 ),
               ),
 
-              // 4. Yuqori o'ng burchak: Oq rasm kartochkasi
+              // 4. Yuqori o'ng burchak: Oq rasm / sanash kartochkasi
               Positioned(
                 top: 10,
                 right: 28,
                 child: GestureDetector(
-                  onTap: () =>
-                      OvozIjrochi.harfniTalaffuzQil(_joriyHarf, _tanlanganTil),
+                  onTap: () => OvozIjrochi.elementniTalaffuzQil(
+                      _joriyElement, _tanlanganTil),
                   child: Container(
-                    width: 148,
+                    width: 152,
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                     decoration: BoxDecoration(
@@ -2224,9 +2958,14 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              _joriyHarf.emoji,
-                              style: const TextStyle(fontSize: 44),
+                            Flexible(
+                              child: Text(
+                                _joriyElement.emoji,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: raqamRejimi ? 22 : 42,
+                                ),
+                              ),
                             ),
                             const SizedBox(width: 4),
                             Icon(Icons.volume_up_rounded,
@@ -2235,7 +2974,7 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          _joriyHarf.soz,
+                          _joriyElement.sozniOlish(_tanlanganTil),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.fredoka(
@@ -2250,7 +2989,7 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
                 ),
               ),
 
-              // 5. Pastki alifbo lentasi
+              // 5. Pastki alifbo yoki raqamlar lentasi (Husnixat kursiv uslubida)
               Positioned(
                 bottom: 6,
                 left: 18,
@@ -2258,14 +2997,14 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
                 height: 42,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: _joriyAlifbo.length,
+                  itemCount: _joriyRoyxat.length,
                   itemBuilder: (context, index) {
-                    final harf = _joriyAlifbo[index];
+                    final item = _joriyRoyxat[index];
                     final bool tanlangan = index == _tanlanganIndex;
                     return GestureDetector(
-                      onTap: () => _harfniTanlash(index),
+                      onTap: () => _elementniTanlash(index),
                       child: Container(
-                        width: 42,
+                        width: 44,
                         margin: const EdgeInsets.symmetric(horizontal: 3),
                         decoration: BoxDecoration(
                           color: tanlangan
@@ -2273,7 +3012,7 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
                               : Colors.white.withValues(alpha: 0.92),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: harf.unli
+                            color: item.unli
                                 ? const Color(0xFFE53935)
                                 : const Color(0xFF1E88E5),
                             width: 2,
@@ -2281,13 +3020,13 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
                         ),
                         alignment: Alignment.center,
                         child: Text(
-                          harf.katta,
-                          style: GoogleFonts.fredoka(
-                            fontSize: 18,
+                          item.katta,
+                          style: GoogleFonts.badScript(
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: tanlangan
                                 ? Colors.white
-                                : (harf.unli
+                                : (item.unli
                                     ? const Color(0xFFE53935)
                                     : const Color(0xFF1565C0)),
                           ),
@@ -2304,6 +3043,36 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
     );
   }
 
+  Widget _bolimTanlashTugmasi() {
+    final String harfMatn = _tanlanganTil == AlifboTili.ru
+        ? 'Буквы'
+        : (_tanlanganTil == AlifboTili.en ? 'Letters' : 'Harflar');
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF3E0),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.orange.shade300),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _miniChip(
+            '🔤 $harfMatn',
+            _tanlanganBolim == OquvBolimi.harflar,
+            () => _bolimniAlmashtirish(OquvBolimi.harflar),
+            aktivRang: const Color(0xFFFF8F00),
+          ),
+          _miniChip(
+            '🔢 0–9',
+            _tanlanganBolim == OquvBolimi.raqamlar,
+            () => _bolimniAlmashtirish(OquvBolimi.raqamlar),
+            aktivRang: const Color(0xFFFF8F00),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _kattaKichikTugma() {
     return Container(
       decoration: BoxDecoration(
@@ -2314,18 +3083,18 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _miniChip(_joriyHarf.katta, _kattaHarf, () {
+          _miniChip(_joriyElement.katta, _kattaHarf, () {
             setState(() {
               _kattaHarf = true;
               _tozalash();
             });
-          }),
-          _miniChip(_joriyHarf.kichik, !_kattaHarf, () {
+          }, kursiv: true),
+          _miniChip(_joriyElement.kichik, !_kattaHarf, () {
             setState(() {
               _kattaHarf = false;
               _tozalash();
             });
-          }),
+          }, kursiv: true),
         ],
       ),
     );
@@ -2352,28 +3121,36 @@ class _RasmMosAlifbeSahifaState extends State<RasmMosAlifbeSahifa> {
     );
   }
 
-  Widget _miniChip(String matn, bool aktiv, VoidCallback onTap) {
+  Widget _miniChip(String matn, bool aktiv, VoidCallback onTap,
+      {Color aktivRang = const Color(0xFF2196F3), bool kursiv = false}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: aktiv ? const Color(0xFF2196F3) : Colors.transparent,
+          color: aktiv ? aktivRang : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
           matn,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: aktiv ? Colors.white : Colors.black87,
-          ),
+          style: kursiv
+              ? GoogleFonts.badScript(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: aktiv ? Colors.white : Colors.black87,
+                )
+              : TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  color: aktiv ? Colors.white : Colors.black87,
+                ),
         ),
       ),
     );
   }
 }
 
+/// Maktab husnixat qiya chiziqlari + ichi bo'sh keng konturli husnixat harf/raqam
 class KonturNuqtaliHarfPainter extends CustomPainter {
   final List<HarfYolagi> yolaklar;
   final Set<String> ulanganlar;
@@ -2387,6 +3164,29 @@ class KonturNuqtaliHarfPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // 0. Yengil maktab husnixat daftarining gorizontal va qiya chiziqlari
+    final Paint daftarGorizontal = Paint()
+      ..color = const Color(0xFFBBDEFB).withValues(alpha: 0.55)
+      ..strokeWidth = 1.3;
+
+    final Paint daftarQiya = Paint()
+      ..color = const Color(0xFFBBDEFB).withValues(alpha: 0.35)
+      ..strokeWidth = 1.0;
+
+    canvas.drawLine(Offset(0, size.height * 0.16),
+        Offset(size.width, size.height * 0.16), daftarGorizontal);
+    canvas.drawLine(Offset(0, size.height * 0.84),
+        Offset(size.width, size.height * 0.84), daftarGorizontal);
+
+    for (double x = -size.height; x < size.width + size.height; x += 75) {
+      canvas.drawLine(
+        Offset(x, size.height),
+        Offset(x + size.height * 0.24, 0),
+        daftarQiya,
+      );
+    }
+
+    // 1. Tashqi keng kulrang kontur va ichki oq yo'lak
     final Paint tashqiQobiq = Paint()
       ..color = const Color(0xFFB0BEC5)
       ..strokeWidth = 46.0
@@ -2423,6 +3223,7 @@ class KonturNuqtaliHarfPainter extends CustomPainter {
       canvas.drawPath(path, ichkiOqYolak);
     }
 
+    // 2. Yo'lak ichidagi nuqtalar, 1-2-3 raqamli doiralar va strelkalar
     final Paint nuqtaKulrang = Paint()..color = const Color(0xFF90A4AE);
     final Paint nuqtaKok = Paint()..color = const Color(0xFF2196F3);
     final Paint raqamDoira = Paint()..color = const Color(0xFF78909C);
